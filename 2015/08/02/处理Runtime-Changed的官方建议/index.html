@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>处理Runtime Changed的官方建议 | Aaron Blogs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一般情况下我们应用的配置发生了改变的话，activity会被destory掉(目的是为了让应用去适应新的配置环境)，然后重开启一个activty,这就涉及到数据存储的问题了。
+一般情况下: activity在发生异常的时候，会先执行onSaveInstanceState()的，把我们的数据存进去，然后在onCreate(Bundle savedInstanceState)或者onRestoreIn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="处理Runtime Changed的官方建议">
+<meta property="og:url" content="http://yoursite.com/2015/08/02/处理Runtime-Changed的官方建议/index.html">
+<meta property="og:site_name" content="Aaron Blogs">
+<meta property="og:description" content="一般情况下我们应用的配置发生了改变的话，activity会被destory掉(目的是为了让应用去适应新的配置环境)，然后重开启一个activty,这就涉及到数据存储的问题了。
+一般情况下: activity在发生异常的时候，会先执行onSaveInstanceState()的，把我们的数据存进去，然后在onCreate(Bundle savedInstanceState)或者onRestoreIn">
+<meta property="og:updated_time" content="2016-03-06T06:13:45.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="处理Runtime Changed的官方建议">
+<meta name="twitter:description" content="一般情况下我们应用的配置发生了改变的话，activity会被destory掉(目的是为了让应用去适应新的配置环境)，然后重开启一个activty,这就涉及到数据存储的问题了。
+一般情况下: activity在发生异常的时候，会先执行onSaveInstanceState()的，把我们的数据存进去，然后在onCreate(Bundle savedInstanceState)或者onRestoreIn">
+  
+    <link rel="alternate" href="/atom.xml" title="Aaron Blogs" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Aaron Blogs</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-处理Runtime-Changed的官方建议" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/02/处理Runtime-Changed的官方建议/" class="article-date">
+  <time datetime="2015-08-02T05:34:02.000Z" itemprop="datePublished">2015-08-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Android/">Android</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      处理Runtime Changed的官方建议
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>一般情况下我们应用的配置发生了改变的话，activity会被destory掉(目的是为了让应用去适应新的配置环境)，然后重开启一个activty,这就涉及到数据存储的问题了。</p>
+<p>一般情况下: activity在发生异常的时候，会先执行onSaveInstanceState()的，把我们的数据存进去，然后在<em>onCreate(Bundle savedInstanceState)</em>或者<em>onRestoreInstanceState(Bundle savedInstanceState)</em>的时候从bundle取出来就可以了,但<em>onSaveInstanceState()</em>只是适合小数据量的情况。如果数据量很大的话，比如说一个复杂的listView里面的item数据(比如说包含了bitmap)，是否也要花一大部分代码去存储数据状态呢?显然是不对的，这样太占用内存了。<br><strong>解决方案有两个</strong><br><a id="more"></a><br>用fragment的形式存储相应数据的references(保证数据不被gc，当然也要保证这个fragment在activity 重新创建的时候不被回收)，然后根据referneces来取出数据。fragment的设计如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RetainedFragment</span> <span class="keyword">extends</span> <span class="title">Fragment</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">//持有对应数据的references,需要注意的是</span></div><div class="line">    <span class="comment">//这个data应该完全独立于activity,context.否则导致内存泄漏</span></div><div class="line">    <span class="keyword">private</span> MyDataObject data;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">        <span class="comment">// 即使附着的activity被re-creation了这个fragment依然还可使用</span></div><div class="line">        setRetainInstance(<span class="keyword">true</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setData</span><span class="params">(MyDataObject data)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.data = data;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> MyDataObject <span class="title">getData</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> data;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">在activity中利用这个fragment存储数据</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> RetainedFragment dataFragment;</div><div class="line">    </div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.main);</div><div class="line">        </div><div class="line">        FragmentManager fm = getFragmentManager();</div><div class="line">        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);</div><div class="line">        <span class="comment">// 在activity创建的时候就初始化这个fragment</span></div><div class="line">        <span class="keyword">if</span> (dataFragment == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">// 附着fragment到当前activity上去</span></div><div class="line">            dataFragment = <span class="keyword">new</span> DataFragment();</div><div class="line">            fm.beginTransaction().add(dataFragment, “data”).commit();</div><div class="line">            <span class="comment">//从web上获取相应数据</span></div><div class="line">            dataFragment.setData(loadMyData());</div><div class="line">        &#125;</div><div class="line">        <span class="comment">// the data is available in dataFragment.getData()</span></div><div class="line">        </div><div class="line">        <span class="comment">//Data data = dataFragment.getData();...</span></div><div class="line">        <span class="comment">//loadData()--&gt;reshow all data</span></div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDestroy</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onDestroy();</div><div class="line">        <span class="comment">// store the data in the fragment</span></div><div class="line">        dataFragment.setData(collectMyLoadedData());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>自己来处理配置改变的情况，不要去resatart这个activity自己复写这个函数就好了，因为系统在这个函数里面执行销毁并重建activity的操作，传进来的newConfig对象包含了所有的变动的config信息,弄一个switch来筛选下需要覆盖的config变动就好</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onConfigurationChanged</span><span class="params">(Configuration newConfig)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>.onConfigurationChanged(newConfig);</div><div class="line">    <span class="keyword">if</span> (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) &#123;</div><div class="line">        Toast.makeText(<span class="keyword">this</span>, <span class="string">"landscape"</span>, Toast.LENGTH_SHORT).show();</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)&#123;</div><div class="line">        Toast.makeText(<span class="keyword">this</span>, <span class="string">"portrait"</span>, Toast.LENGTH_SHORT).show();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/08/02/处理Runtime-Changed的官方建议/" data-id="ciwx7szna000xphs6mnpe745a" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/08/16/databinding-insteadof-holder/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android Databinding在adapter中完全取代ViewHolder实践
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/05/10/Bitmap相关tips的笔记/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Bitmap相关tips的笔记</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/2016/">2016</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/AndroidUtils解析/">AndroidUtils解析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Bash/">Bash</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CleanCode/">CleanCode</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/gc/">gc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/jvm/">jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/序列化协议/">序列化协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Utils/">Android Utils</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CleanCode/">CleanCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DataBinding/">DataBinding</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/序列化协议/">序列化协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Android-Utils/" style="font-size: 10px;">Android Utils</a> <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/CleanCode/" style="font-size: 10px;">CleanCode</a> <a href="/tags/DataBinding/" style="font-size: 10px;">DataBinding</a> <a href="/tags/Gradle-构建工具/" style="font-size: 10px;">Gradle 构建工具</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Runtime-Changed/" style="font-size: 10px;">Runtime Changed</a> <a href="/tags/jvm/" style="font-size: 20px;">jvm</a> <a href="/tags/序列化协议/" style="font-size: 10px;">序列化协议</a> <a href="/tags/统计java代码量/" style="font-size: 10px;">统计java代码量</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/22/json反-序列化的优劣势/">json反/序列化的优劣势</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/09/Gradle中的文件操作/">Gradle中的文件操作</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

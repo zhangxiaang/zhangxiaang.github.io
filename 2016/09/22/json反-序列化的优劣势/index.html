@@ -3,14 +3,36 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2016 | Aaron Blogs</title>
+  <title>json反/序列化的优劣势 | Aaron Blogs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Aaron Blogs">
-<meta property="og:url" content="http://yoursite.com/archives/2016/index.html">
+  <meta name="description" content="Json作为业内(web)公认的序列化协议
+
+对于跨平台跨语言的问题解决的很好
+可调试性好，在线解析工具支持的比较好。但是作为代价的就是保密性不佳
+数据量相比来讲小很多,在传输和解析(同样也depends on解析的代码)的速度上算得上是最优选择
+可拓展性好，对于业务频繁的更换，也能随时切换自如
+json到obj的转化实际上是程序员通过标准化的代码来取代了序列化协议中的IDL文件，而这个文件的作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="json反/序列化的优劣势">
+<meta property="og:url" content="http://yoursite.com/2016/09/22/json反-序列化的优劣势/index.html">
 <meta property="og:site_name" content="Aaron Blogs">
+<meta property="og:description" content="Json作为业内(web)公认的序列化协议
+
+对于跨平台跨语言的问题解决的很好
+可调试性好，在线解析工具支持的比较好。但是作为代价的就是保密性不佳
+数据量相比来讲小很多,在传输和解析(同样也depends on解析的代码)的速度上算得上是最优选择
+可拓展性好，对于业务频繁的更换，也能随时切换自如
+json到obj的转化实际上是程序员通过标准化的代码来取代了序列化协议中的IDL文件，而这个文件的作">
+<meta property="og:updated_time" content="2016-10-10T03:45:08.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Aaron Blogs">
+<meta name="twitter:title" content="json反/序列化的优劣势">
+<meta name="twitter:description" content="Json作为业内(web)公认的序列化协议
+
+对于跨平台跨语言的问题解决的很好
+可调试性好，在线解析工具支持的比较好。但是作为代价的就是保密性不佳
+数据量相比来讲小很多,在传输和解析(同样也depends on解析的代码)的速度上算得上是最优选择
+可拓展性好，对于业务频繁的更换，也能随时切换自如
+json到obj的转化实际上是程序员通过标准化的代码来取代了序列化协议中的IDL文件，而这个文件的作">
   
     <link rel="alternate" href="/atom.xml" title="Aaron Blogs" type="application/atom+xml">
   
@@ -59,215 +81,77 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="archive-article-date">
-  <time datetime="2016-11-07T06:23:41.000Z" itemprop="datePublished">Nov 7</time>
+        <section id="main"><article id="post-json反-序列化的优劣势" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/09/22/json反-序列化的优劣势/" class="article-date">
+  <time datetime="2016-09-22T03:29:25.000Z" itemprop="datePublished">2016-09-22</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/序列化协议/">序列化协议</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+    <h1 class="article-title" itemprop="name">
+      json反/序列化的优劣势
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/11/07/Shell主要的命令笔记/" class="archive-article-date">
-  <time datetime="2016-11-07T02:05:09.000Z" itemprop="datePublished">Nov 7</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
-    </h1>
-  
+        <a id="more"></a>
+<p>Json作为业内(web)公认的序列化协议</p>
+<ul>
+<li>对于跨平台跨语言的问题解决的很好</li>
+<li>可调试性好，在线解析工具支持的比较好。但是作为代价的就是保密性不佳</li>
+<li>数据量相比来讲小很多,在传输和解析(同样也depends on解析的代码)的速度上算得上是最优选择</li>
+<li>可拓展性好，对于业务频繁的更换，也能随时切换自如</li>
+<li>json到obj的转化实际上是程序员通过标准化的代码来取代了序列化协议中的IDL文件，而这个文件的作用就是描述每一个属性的信息；然而json的数据就是对应着一个obj的各个属性，所以就省去了IDL compiler的角色了。</li>
+<li>不过另外一个问题就是在某些语言中解析Json转化成对应语言中的某种结构的方式有所不同，例如在Java中，解析的方式是通过reflection来实现的,众所皆知反射带来的性能缺失问题，尤其当数据量比较大的时候而且对与数据的实时性要求较高例如ms级别的请求,Json来作为序列化协议就无能为力了,这个时候就可以参考Thrift项目了满足当前大数据量、分布式、跨语言、跨平台数据通讯的需求。</li>
+</ul>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/10/10/一些疑问记录-待答-/" class="archive-article-date">
-  <time datetime="2016-10-10T02:01:04.000Z" itemprop="datePublished">Oct 10</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/22/json反-序列化的优劣势/" class="archive-article-date">
-  <time datetime="2016-09-22T03:29:25.000Z" itemprop="datePublished">Sep 22</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/09/22/json反-序列化的优劣势/" data-id="ciwx7szmx000iphs69y32pxml" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/22/json反-序列化的优劣势/">json反/序列化的优劣势</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/09/Gradle中的文件操作/" class="archive-article-date">
-  <time datetime="2016-09-09T06:48:42.000Z" itemprop="datePublished">Sep 9</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/09/Gradle中的文件操作/">Gradle中的文件操作</a>
-    </h1>
-  
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/序列化协议/">序列化协议</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/10/10/一些疑问记录-待答-/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          一些疑问记录(待答).md
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/09/09/Gradle中的文件操作/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Gradle中的文件操作</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" class="archive-article-date">
-  <time datetime="2016-09-03T16:17:01.000Z" itemprop="datePublished">Sep 4</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/">使用ThreadLocal storage来避免lock带来的性能损耗问题</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" class="archive-article-date">
-  <time datetime="2016-09-03T11:51:34.000Z" itemprop="datePublished">Sep 3</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/">新生代gc会去遍历老生代区查看被引用的对象吗?</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/28/2016-TODO-List/" class="archive-article-date">
-  <time datetime="2016-07-28T15:01:02.000Z" itemprop="datePublished">Jul 28</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/2016-TODO-List/">2016 TODO List</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/28/CleanCode/" class="archive-article-date">
-  <time datetime="2016-07-28T14:46:19.000Z" itemprop="datePublished">Jul 28</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/CleanCode/">CleanCode</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/21/Android-Utils解析/" class="archive-article-date">
-  <time datetime="2016-07-21T11:04:20.000Z" itemprop="datePublished">Jul 21</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/21/Android-Utils解析/">Android Utils解析</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-
-  <nav id="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/2016/page/2/">2</a><a class="extend next" rel="next" href="/archives/2016/page/2/">__('next') &raquo;</a>
-  </nav>
 </section>
         
           <aside id="sidebar">

@@ -3,14 +3,48 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2016 | Aaron Blogs</title>
+  <title>虚拟机遇到new指令,发生了什么 | Aaron Blogs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Aaron Blogs">
-<meta property="og:url" content="http://yoursite.com/archives/2016/index.html">
+  <meta name="description" content="从代码 Clazz instance = new Clazz; 编译成class中的new指令,虚拟机在遇到这个new的指令的时候,具体会去做什么呢?大概分为了如下几个大的步骤:
+* 检验
+* 为对象分配内存
+* 考虑线程安全问题
+而每一个大的步骤下还有很多细节步骤:
+检验:
+
+检查这个new指令是否能在常量池中定位到一个类的引用
+接着检查这个类的引用是否已经被vm加载并且解析初始化过
+
+如果上述">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟机遇到new指令,发生了什么">
+<meta property="og:url" content="http://yoursite.com/2016/11/07/虚拟机遇到new指令发生了什么/index.html">
 <meta property="og:site_name" content="Aaron Blogs">
+<meta property="og:description" content="从代码 Clazz instance = new Clazz; 编译成class中的new指令,虚拟机在遇到这个new的指令的时候,具体会去做什么呢?大概分为了如下几个大的步骤:
+* 检验
+* 为对象分配内存
+* 考虑线程安全问题
+而每一个大的步骤下还有很多细节步骤:
+检验:
+
+检查这个new指令是否能在常量池中定位到一个类的引用
+接着检查这个类的引用是否已经被vm加载并且解析初始化过
+
+如果上述">
+<meta property="og:updated_time" content="2016-11-08T03:46:26.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Aaron Blogs">
+<meta name="twitter:title" content="虚拟机遇到new指令,发生了什么">
+<meta name="twitter:description" content="从代码 Clazz instance = new Clazz; 编译成class中的new指令,虚拟机在遇到这个new的指令的时候,具体会去做什么呢?大概分为了如下几个大的步骤:
+* 检验
+* 为对象分配内存
+* 考虑线程安全问题
+而每一个大的步骤下还有很多细节步骤:
+检验:
+
+检查这个new指令是否能在常量池中定位到一个类的引用
+接着检查这个类的引用是否已经被vm加载并且解析初始化过
+
+如果上述">
   
     <link rel="alternate" href="/atom.xml" title="Aaron Blogs" type="application/atom+xml">
   
@@ -59,215 +93,87 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="archive-article-date">
-  <time datetime="2016-11-07T06:23:41.000Z" itemprop="datePublished">Nov 7</time>
+        <section id="main"><article id="post-虚拟机遇到new指令发生了什么" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="article-date">
+  <time datetime="2016-11-07T06:23:41.000Z" itemprop="datePublished">2016-11-07</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/JVM/">JVM</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+    <h1 class="article-title" itemprop="name">
+      虚拟机遇到new指令,发生了什么
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/11/07/Shell主要的命令笔记/" class="archive-article-date">
-  <time datetime="2016-11-07T02:05:09.000Z" itemprop="datePublished">Nov 7</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
-    </h1>
-  
+        <p>从代码 <code>Clazz instance = new Clazz;</code> 编译成class中的new指令,<br>虚拟机在遇到这个new的指令的时候,具体会去做什么呢?<br>大概分为了如下几个大的步骤:</p>
+<pre><code>* 检验
+* 为对象分配内存
+* 考虑线程安全问题
+</code></pre><p>而每一个大的步骤下还有很多细节步骤:</p>
+<p>检验:</p>
+<ul>
+<li>检查这个new指令是否能在常量池中定位到一个类的引用</li>
+<li>接着检查这个类的引用是否已经被vm加载并且解析初始化过</li>
+</ul>
+<p>如果上述的步骤表明一个类尚未被vm加载过,那么执行加载类的步骤,也就是开始为类对象分配内存.</p>
+<p>分配内存:</p>
+<ul>
+<li>一旦一个类成功的加载入虚拟机,这个类所占据的内存大小也同时给固定下来了。(疑问: 一个类含有StringBuilder之类的可动态扩展内存大小的对象呢? 在runTime期间动态改变自己所占据的内存大小),但是内存如何从堆内存区域 划分出来的呢? 根据堆内存是否完整来划分的:<ul>
+<li>内存根据已经使用和空闲状态分为了两个区域,也就是连续状态,而其中空闲与使用过的边界就是一个指针来记录着这个边界的内存地址。只要对象申请了指定大小的内存区域,那么这个指针只需要在空闲内存偏移指定大小的地址空间即可完成内存的分配。</li>
+<li>另外一种就是非理想状态也是实际状态的了:内存并非是连续的,所以虚拟机需要维护一个列表记录了哪些可用的内存地址区域,在分配内存的时候更新此列表即可。当然这样是麻烦了很多</li>
+<li>总结就是内存的分配方式是根据内存区域是否连续而决定,而内存区域是否连续的根本原因在于垃圾回收器是否采用了内存压缩整理算法(Serial之类的算法采用了压缩整理算法所以内存的分配是采用指针碰撞式,而类似Mark-Sweep算法收集器采用的是空闲列表式来处理内存的分配)。</li>
+</ul>
+</li>
+</ul>
+<p>在解决了内存分配的同时需要考虑的一个难点就是,在并发环境下:虚拟机在频繁的对象内存分配的时候如何保证线程的安全呢?</p>
+<p>考虑并发情況下线程安全问题,有两种方案:</p>
+<ol>
+<li>对内存分配这一操作进行同步(也就是保证内存分配操作的原子性)</li>
+<li>每一个线程在堆内存预先分配了一小块内存称之为ThreadLocalAllocationBuffer,这个内存用于记录本线程所执行的内存分配操作，当ThreadLocalAllocationBuffer内存用完分配新的 ThreadLocalAllocationBuffer 时候才考虑同步锁定内存区域。</li>
+</ol>
+<p>当类对象成功的allocate到了指定大小的内存区域,虚拟机会把分配给类对象的这块区域初始化一下,初始化的内容就是把这块区域的内容全部置为0.这一步骤保证了一些对象可以在不赋予初始值就可以访问到对应数据类型的零值。</p>
+<p>紧接着就是Object Header的设置了,包括对象的类,对象的hashcode,GC的年代信息之类的。</p>
+<p>以上整个流程只是强调<code>VM中完成了一个类的初始化</code>而已,在Java程序看来却是<code>啥都没发生过</code>,因为init还没执行呢,所有的变量槽位都还是0值呢,只有init执行完成一个真正意义上的Class Object才初始化完成。</p>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/10/10/一些疑问记录-待答-/" class="archive-article-date">
-  <time datetime="2016-10-10T02:01:04.000Z" itemprop="datePublished">Oct 10</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/22/json反-序列化的优劣势/" class="archive-article-date">
-  <time datetime="2016-09-22T03:29:25.000Z" itemprop="datePublished">Sep 22</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="ciwx7sznn0017phs60oq64q1l" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/22/json反-序列化的优劣势/">json反/序列化的优劣势</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/09/Gradle中的文件操作/" class="archive-article-date">
-  <time datetime="2016-09-09T06:48:42.000Z" itemprop="datePublished">Sep 9</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/09/Gradle中的文件操作/">Gradle中的文件操作</a>
-    </h1>
-  
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/11/07/Shell主要的命令笔记/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Shell主要的命令笔记</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" class="archive-article-date">
-  <time datetime="2016-09-03T16:17:01.000Z" itemprop="datePublished">Sep 4</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/">使用ThreadLocal storage来避免lock带来的性能损耗问题</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" class="archive-article-date">
-  <time datetime="2016-09-03T11:51:34.000Z" itemprop="datePublished">Sep 3</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/">新生代gc会去遍历老生代区查看被引用的对象吗?</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/28/2016-TODO-List/" class="archive-article-date">
-  <time datetime="2016-07-28T15:01:02.000Z" itemprop="datePublished">Jul 28</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/2016-TODO-List/">2016 TODO List</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/28/CleanCode/" class="archive-article-date">
-  <time datetime="2016-07-28T14:46:19.000Z" itemprop="datePublished">Jul 28</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/CleanCode/">CleanCode</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/21/Android-Utils解析/" class="archive-article-date">
-  <time datetime="2016-07-21T11:04:20.000Z" itemprop="datePublished">Jul 21</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/21/Android-Utils解析/">Android Utils解析</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-
-  <nav id="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/2016/page/2/">2</a><a class="extend next" rel="next" href="/archives/2016/page/2/">__('next') &raquo;</a>
-  </nav>
 </section>
         
           <aside id="sidebar">

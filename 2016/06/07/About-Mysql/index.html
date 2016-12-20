@@ -3,14 +3,30 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2016 | Aaron Blogs</title>
+  <title>About Mysql | Aaron Blogs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Aaron Blogs">
-<meta property="og:url" content="http://yoursite.com/archives/2016/index.html">
+  <meta name="description" content="有时候开启server的时候爆出
+1The server quit without updating PID file
+异常，正确的解法是把/usr/local/var/mysql/下的文件以.err结尾的文件都给删除掉重新开启mysql.server start可以直接开启服务
+另外呢 经常忘记密码修改密码流程如下:
+0. 关掉所有的mysqld的服务(在activity monitor.app">
+<meta property="og:type" content="article">
+<meta property="og:title" content="About Mysql">
+<meta property="og:url" content="http://yoursite.com/2016/06/07/About-Mysql/index.html">
 <meta property="og:site_name" content="Aaron Blogs">
+<meta property="og:description" content="有时候开启server的时候爆出
+1The server quit without updating PID file
+异常，正确的解法是把/usr/local/var/mysql/下的文件以.err结尾的文件都给删除掉重新开启mysql.server start可以直接开启服务
+另外呢 经常忘记密码修改密码流程如下:
+0. 关掉所有的mysqld的服务(在activity monitor.app">
+<meta property="og:updated_time" content="2016-06-08T04:06:56.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Aaron Blogs">
+<meta name="twitter:title" content="About Mysql">
+<meta name="twitter:description" content="有时候开启server的时候爆出
+1The server quit without updating PID file
+异常，正确的解法是把/usr/local/var/mysql/下的文件以.err结尾的文件都给删除掉重新开启mysql.server start可以直接开启服务
+另外呢 经常忘记密码修改密码流程如下:
+0. 关掉所有的mysqld的服务(在activity monitor.app">
   
     <link rel="alternate" href="/atom.xml" title="Aaron Blogs" type="application/atom+xml">
   
@@ -59,215 +75,75 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="archive-article-date">
-  <time datetime="2016-11-07T06:23:41.000Z" itemprop="datePublished">Nov 7</time>
+        <section id="main"><article id="post-About-Mysql" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/07/About-Mysql/" class="article-date">
+  <time datetime="2016-06-07T13:41:58.000Z" itemprop="datePublished">2016-06-07</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+    <h1 class="article-title" itemprop="name">
+      About Mysql
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/11/07/Shell主要的命令笔记/" class="archive-article-date">
-  <time datetime="2016-11-07T02:05:09.000Z" itemprop="datePublished">Nov 7</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/10/10/一些疑问记录-待答-/" class="archive-article-date">
-  <time datetime="2016-10-10T02:01:04.000Z" itemprop="datePublished">Oct 10</time>
-</a>
+        <p>有时候开启server的时候爆出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">The server quit without updating PID file</div></pre></td></tr></table></figure>
+<p>异常，正确的解法是把/usr/local/var/mysql/下的文件以.err结尾的文件都给删除掉<br>重新开启mysql.server start可以直接开启服务</p>
+<p>另外呢 经常忘记密码<br>修改密码流程如下:</p>
+<pre><code>0. 关掉所有的mysqld的服务(在activity monitor.app里面检索mysqld点击close即可)
+1. mysqld --skip-grant-tables --user=USERNAME &amp; (USERNAME=你的root用户名)
+2. 这个时候就可以直接输入mysql进入到数据库中了。
+3. update mysql.user SET authentication_string = PASSWORD(&apos;NewPassord&apos;), password_expired = &apos;N&apos;
+WHERE User = &apos;root&apos; AND Host = &apos;localhost&apos;;
+4. 如果返回的是一个Rows matched: 1  Changed: 1  即可继续执行FLUSH PRIVILEGES; 更新内容了。
+5. 接着只需要关闭mysqld，使用mysql.server start一个新的mysqld出来即可(可能会遇到without updating PID file按照上叙即可解决)
+</code></pre><p>Some about ThinkPhp链接数据库的问题:</p>
+<pre><code>0. 如果你的table里面有大小写混写的name的话，在config.php里面添加一个配置&apos;DB_PARAMS&apos;                =&gt;  array(\PDO::ATTR_CASE =&gt; \PDO::CASE_NATURAL),即可解决问题
+1. 如果在链接数据库的时候一直遇到如下问题: SQLSTATE[HY000] [2002] No such file or directory  查询知道是在DbDriver这里链接数据库出了问题，肯定是参数错了，但是奇葩的是解决方案是把 &apos;DB_HOST&apos;-&gt;&apos;localhost&apos; 改成 &apos;DB_HOST&apos;-&gt;&apos;127.0.0.1&apos;就解决这个问题 ， 也许是这个版本中的DNS并没有根据localhost来解析对应的ip地址吧
+</code></pre>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/22/json反-序列化的优劣势/" class="archive-article-date">
-  <time datetime="2016-09-22T03:29:25.000Z" itemprop="datePublished">Sep 22</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/07/About-Mysql/" data-id="ciwx7szm50001phs6krpyd01b" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/22/json反-序列化的优劣势/">json反/序列化的优劣势</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/09/Gradle中的文件操作/" class="archive-article-date">
-  <time datetime="2016-09-09T06:48:42.000Z" itemprop="datePublished">Sep 9</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/09/Gradle中的文件操作/">Gradle中的文件操作</a>
-    </h1>
-  
-
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/07/08/Android-WebView开发tips/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android WebView开发tips
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/01/统计代码量/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">统计Android项目java文件代码量</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" class="archive-article-date">
-  <time datetime="2016-09-03T16:17:01.000Z" itemprop="datePublished">Sep 4</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/">使用ThreadLocal storage来避免lock带来的性能损耗问题</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" class="archive-article-date">
-  <time datetime="2016-09-03T11:51:34.000Z" itemprop="datePublished">Sep 3</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/">新生代gc会去遍历老生代区查看被引用的对象吗?</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/28/2016-TODO-List/" class="archive-article-date">
-  <time datetime="2016-07-28T15:01:02.000Z" itemprop="datePublished">Jul 28</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/2016-TODO-List/">2016 TODO List</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/28/CleanCode/" class="archive-article-date">
-  <time datetime="2016-07-28T14:46:19.000Z" itemprop="datePublished">Jul 28</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/CleanCode/">CleanCode</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/07/21/Android-Utils解析/" class="archive-article-date">
-  <time datetime="2016-07-21T11:04:20.000Z" itemprop="datePublished">Jul 21</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/21/Android-Utils解析/">Android Utils解析</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-
-  <nav id="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/2016/page/2/">2</a><a class="extend next" rel="next" href="/archives/2016/page/2/">__('next') &raquo;</a>
-  </nav>
 </section>
         
           <aside id="sidebar">
