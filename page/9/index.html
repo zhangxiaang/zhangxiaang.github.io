@@ -61,14 +61,14 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-Android-Utils解析" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-使用ThreadLocal-storage来避免lock带来的性能损耗问题" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/07/21/Android-Utils解析/" class="article-date">
-  <time datetime="2016-07-21T11:04:20.000Z" itemprop="datePublished">2016-07-21</time>
+    <a href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" class="article-date">
+  <time datetime="2016-09-03T16:17:01.000Z" itemprop="datePublished">2016-09-04</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/AndroidUtils解析/">AndroidUtils解析</a>
+    <a class="article-category-link" href="/categories/jvm/">jvm</a>
   </div>
 
   </div>
@@ -79,7 +79,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/21/Android-Utils解析/">Android Utils解析</a>
+      <a class="article-title" href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/">使用ThreadLocal storage来避免lock带来的性能损耗问题</a>
     </h1>
   
 
@@ -87,14 +87,26 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <a id="more"></a>
+<p>在jvm的垃圾回收章节中有讲到一个问题，就是关于young-generation中对新生对象的内存分配的优化涉及到的两个技术点，一个是Bump-the-pointer,此技术追踪了当前young-generation区的edan区域最新分配内存的对象，此对象放置在edan区域的top位置，最容易被访问到,然后当再次需要分配内存给新的对象的时候,都会检测edan区剩余的内存空间是否足以分配给new出来的对象，如果空间足够的话那么新生成的对象再次取代上一个new出来的对象的top位置(应该是一个链表的结构).不够的话自然触发minor gc了。</p>
+<p>以上看起来很不错，但是前提是在单线程中很好用;万一是多线程环境呢?第一反应肯定是在alloc内存之前加锁呗…然而这样带来的问题就是性能低下，毕竟new那么频繁，对性能的影响肯定是极大的。</p>
+<p>所以对应的技术就是Thread-local allocation buffers，避免加锁也能实现内存的高效分配。</p>
+<p><a href="https://software.intel.com/en-us/articles/use-thread-local-storage-to-reduce-synchronization" target="_blank" rel="external">参考</a></p>
+<p>其中有一个example code如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> count=<span class="number">0</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp parallel shared(count)</span></div><div class="line">&#123;</div><div class="line"> . . .</div><div class="line"> <span class="keyword">if</span> (event_happened) &#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp atomic</span></div><div class="line"> count++;</div><div class="line">&#125;</div><div class="line">. . .</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这段代码必须要保证在多线程环境下对count的自加行为是同步发生的，所以解决的思路是:让每一个线程在自己的内存空间中对这个count进行自加，然后再统一sum各个线程中的count值，最终得到的value就是正确的结果。据此改善后的代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> count=<span class="number">0</span>;</div><div class="line"><span class="keyword">int</span> tcount=<span class="number">0</span>;<span class="comment">//线程独立内存空间中的count值，其特点就是只能被当前线程内部的所有函数操作,但是其他的线程无法操作。</span></div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp threadprivate(tcount)</span></div><div class="line">omp_set_dynamic(<span class="number">0</span>);</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp parallel</span></div><div class="line">&#123;</div><div class="line">. . .</div><div class="line"> <span class="keyword">if</span> (event_happened) &#123;</div><div class="line"> tcount++;</div><div class="line"> &#125;</div><div class="line"> . . .</div><div class="line">&#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp parallel shared(count)</span></div><div class="line">&#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp atomic</span></div><div class="line"> count += tcount;<span class="comment">//最终的sum操作</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>那么实现一个thread-local storage的原理是怎样的呢?<br>通常的做法是建立一个全局表，这张表里记录着threadID-&gt;thread-data-addr,也就是这张表需要记录的就是每一个thread的id映射到各自的数据内存地址即可。</p>
+<p>具体实现,参考java层实现的thread-local,在此博文中有讲到,可供参考<a href="http://zhangxiaang.github.io/2015/12/02/ThreadLocal%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/" target="_blank" rel="external">ThreadLocal的工作原理</a></p>
+<p>—–update<br>threadID-&gt;thread-data是最早的设计，目前已经使用一个Values类来描述存储数据结构，实质上是一个Object[],并且是一个比较有意思的数组，体现在threadLocal对象作为key，独立变量参数作为value；可是这个数据结构不就是一个Obejct[]数组吗?哪来的key-&gt;value映射呢?(肯定需要一个map吧)，然而设计的是这个obj[]的偶数index存放的是threadlcoal对象而相邻的奇数index存放的就是对应的value.</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/21/Android-Utils解析/" data-id="cixgy9e6d0001sas6vko0csyn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" data-id="cixpznulf000h8ws6xcvpoyeo" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android-Utils/">Android Utils</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
 
     </footer>
   </div>
@@ -106,7 +118,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/8/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/10/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/8/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/10/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -116,7 +128,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Kategorier</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/2016/">2016</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/AndroidUtils解析/">AndroidUtils解析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Bash/">Bash</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/gc/">gc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/jvm/">jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/序列化协议/">序列化协议</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/2016/">2016</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Bash/">Bash</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/gc/">gc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/jvm/">jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/序列化协议/">序列化协议</a></li></ul>
     </div>
   </div>
 
@@ -126,7 +138,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Utils/">Android Utils</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DataBinding/">DataBinding</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/序列化协议/">序列化协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Code/">Code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DataBinding/">DataBinding</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java并发/">Java并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/序列化协议/">序列化协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
     </div>
   </div>
 
@@ -136,7 +148,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Android-Utils/" style="font-size: 10px;">Android Utils</a> <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/DataBinding/" style="font-size: 10px;">DataBinding</a> <a href="/tags/Gradle-构建工具/" style="font-size: 10px;">Gradle 构建工具</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Runtime-Changed/" style="font-size: 10px;">Runtime Changed</a> <a href="/tags/jvm/" style="font-size: 20px;">jvm</a> <a href="/tags/序列化协议/" style="font-size: 10px;">序列化协议</a> <a href="/tags/统计java代码量/" style="font-size: 10px;">统计java代码量</a>
+      <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/Code/" style="font-size: 10px;">Code</a> <a href="/tags/DataBinding/" style="font-size: 10px;">DataBinding</a> <a href="/tags/Gradle-构建工具/" style="font-size: 10px;">Gradle 构建工具</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Java并发/" style="font-size: 10px;">Java并发</a> <a href="/tags/Runtime-Changed/" style="font-size: 10px;">Runtime Changed</a> <a href="/tags/jvm/" style="font-size: 20px;">jvm</a> <a href="/tags/序列化协议/" style="font-size: 10px;">序列化协议</a> <a href="/tags/统计java代码量/" style="font-size: 10px;">统计java代码量</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a>
     </div>
   </div>
 
@@ -145,7 +157,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Arkiv</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li></ul>
     </div>
   </div>
 
@@ -158,23 +170,23 @@
       <ul>
         
           <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
+          </li>
+        
+          <li>
             <a href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
           </li>
         
           <li>
             <a href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/22/json反-序列化的优劣势/">json反/序列化的优劣势</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/09/Gradle中的文件操作/">Gradle中的文件操作</a>
           </li>
         
       </ul>
