@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -61,12 +61,16 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-关于DCL的笔记" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-虚拟机遇到new指令发生了什么" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/01/09/关于DCL的笔记/" class="article-date">
-  <time datetime="2017-01-09T08:04:37.000Z" itemprop="datePublished">2017-01-09</time>
+    <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="article-date">
+  <time datetime="2016-11-07T06:23:41.000Z" itemprop="datePublished">2016-11-07</time>
 </a>
     
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/JVM/">JVM</a>
+  </div>
+
   </div>
   <div class="article-inner">
     
@@ -75,7 +79,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
+      <a class="article-title" href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
     </h1>
   
 
@@ -83,22 +87,23 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>装逼用的是说DCL ,其实就是double check lock,如下代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton mInstance = <span class="keyword">null</span>;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">if</span>(mInstance == <span class="keyword">null</span>)&#123;</div><div class="line">			<span class="keyword">synchronized</span> (Singletom.class)&#123;</div><div class="line">				<span class="keyword">if</span>(mInstance == <span class="keyword">null</span>)&#123;</div><div class="line">					mInstance = <span class="keyword">new</span> Singleton();</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> mInstance;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>以上就是为了解决并发环境下获取单例实例的一个写法, 第一个判空是为了避免不必要的同步代码操作，第二个判空则是为了保证只执行一次实例操作。<br>当执行到了 <code>mInstance = new Singleton();</code> 也就是实例化一个类对象的时候，粗略的看来是完成了三个操作:(可参考 <a href="https://zhangxiaang.github.io/2016/11/07/%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%81%87%E5%88%B0new%E6%8C%87%E4%BB%A4%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/" target="_blank" rel="external">虚拟机遇到new时内存分配</a>)</p>
-<pre><code>* 为类实例分配内存;
-* 调用类默认构造函数;
-* 将分配好了的内存空间地址指针指向类实例(此时的mInstance == null就不成立了)
-</code></pre><p>(由此可得,类对象是否成功的实例化的依据是类引用指向了内存指定的地址而不是调用了构造函数)<br>由于在JDK1.5之前的JMM(java memory model)中规定,第二条和第三条的执行顺序不可定,如果线程1是1,2,3的顺序执行实例化操作,在任何一个步骤中有外来线程调用getInstance()都不会有问题的;但是如果线程1是1,3,2的顺序来执行实例化操作的话,外来线程调用到了getInstance()函数,此时的构造函数并没有调用到而只是分配到了内存空间,此时的外来线程如果获取到instance从而去执行某个类函数的话就会因尚未执行构造函数导致异常的发生.<br>解决方法就是给mInstance添加volatile修饰,这样可以保证读取的instance都是从主内存中获取的，保证了读的一致性。</p>
-<p>当然咯,DCL不是最好的选择,用下面的就可以了.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> SingletonHolder.sInstance;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span></span>&#123;</div><div class="line">		<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton mInstance = <span class="keyword">new</span> Singleton();</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+        <p>从代码 <code>Clazz instance = new Clazz;</code> 编译成class中的new指令,<br>虚拟机在遇到这个new的指令的时候,具体会去做什么呢?<br>大概分为了如下几个大的步骤:</p>
+<pre><code>* 检验
+* 为对象分配内存
+* 考虑线程安全问题
+</code></pre><p>而每一个大的步骤下还有很多细节步骤:</p>
+        
+          <p class="article-more-link">
+            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/01/09/关于DCL的笔记/" data-id="ciy17dwb6000v7ps6gfnj5vsw" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="ciy9m9n1b000o9hs67r239brj" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
 
     </footer>
   </div>
@@ -110,7 +115,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/3/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/5/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/3/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/5/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -118,9 +123,9 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Categorieën</h3>
+    <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/2016/">2016</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Bash/">Bash</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/gc/">gc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/jvm/">jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/序列化协议/">序列化协议</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Bash/">Bash</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/gc/">gc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/jvm/">jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/序列化协议/">序列化协议</a></li></ul>
     </div>
   </div>
 
@@ -128,9 +133,9 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Labels</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Blur/">Android Blur</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Code/">Code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java并发/">Java并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/序列化协议/">序列化协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Code/">Code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java并发/">Java并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/序列化协议/">序列化协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
     </div>
   </div>
 
@@ -140,14 +145,14 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Android-Blur/" style="font-size: 10px;">Android Blur</a> <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/Code/" style="font-size: 10px;">Code</a> <a href="/tags/Gradle-构建工具/" style="font-size: 10px;">Gradle 构建工具</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Java并发/" style="font-size: 10px;">Java并发</a> <a href="/tags/Runtime-Changed/" style="font-size: 10px;">Runtime Changed</a> <a href="/tags/jvm/" style="font-size: 20px;">jvm</a> <a href="/tags/序列化协议/" style="font-size: 10px;">序列化协议</a> <a href="/tags/统计java代码量/" style="font-size: 10px;">统计java代码量</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a>
+      <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/Code/" style="font-size: 10px;">Code</a> <a href="/tags/Gradle-构建工具/" style="font-size: 10px;">Gradle 构建工具</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Java并发/" style="font-size: 10px;">Java并发</a> <a href="/tags/Runtime-Changed/" style="font-size: 10px;">Runtime Changed</a> <a href="/tags/jvm/" style="font-size: 20px;">jvm</a> <a href="/tags/序列化协议/" style="font-size: 10px;">序列化协议</a> <a href="/tags/统计java代码量/" style="font-size: 10px;">统计java代码量</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a>
     </div>
   </div>
 
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archieven</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li></ul>
     </div>
@@ -157,17 +162,9 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recente berichten</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2017/01/17/Android关于底部activity模糊处理的一个方法/">Android关于底部activity模糊处理的一个方法</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/14/java的函数对象/">java的函数对象</a>
-          </li>
         
           <li>
             <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
@@ -179,6 +176,14 @@
         
           <li>
             <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
           </li>
         
       </ul>
