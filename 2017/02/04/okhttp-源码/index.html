@@ -3,14 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>张翔的博客</title>
+  <title>okhttp 源码 | 张翔的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="张翔的博客">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="整个okHttp源码最为核心的部分就是Interceptor了,它负责了实际的网络请求、错误重发、缓存、压缩、解析等一系列的实质性的工作，而其中的每一项工作都是具有独立的Interceptor来完成对应的工作.也就是一个典型的责任链模式,而每一个Interceptor所在chain的位置决定了它的功能,例如请求服务器数据 和 解析服务器返回的数据就应该在此责任链的尾部.
+在阅读源码的过程中,着重了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="okhttp 源码">
+<meta property="og:url" content="http://yoursite.com/2017/02/04/okhttp-源码/index.html">
 <meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="整个okHttp源码最为核心的部分就是Interceptor了,它负责了实际的网络请求、错误重发、缓存、压缩、解析等一系列的实质性的工作，而其中的每一项工作都是具有独立的Interceptor来完成对应的工作.也就是一个典型的责任链模式,而每一个Interceptor所在chain的位置决定了它的功能,例如请求服务器数据 和 解析服务器返回的数据就应该在此责任链的尾部.
+在阅读源码的过程中,着重了">
+<meta property="og:updated_time" content="2017-02-06T06:24:25.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="张翔的博客">
+<meta name="twitter:title" content="okhttp 源码">
+<meta name="twitter:description" content="整个okHttp源码最为核心的部分就是Interceptor了,它负责了实际的网络请求、错误重发、缓存、压缩、解析等一系列的实质性的工作，而其中的每一项工作都是具有独立的Interceptor来完成对应的工作.也就是一个典型的责任链模式,而每一个Interceptor所在chain的位置决定了它的功能,例如请求服务器数据 和 解析服务器返回的数据就应该在此责任链的尾部.
+在阅读源码的过程中,着重了">
   
     <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
   
@@ -59,9 +66,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-okhttp-源码" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-okhttp-源码" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/02/04/okhttp-源码/" class="article-date">
   <time datetime="2017-02-04T06:09:53.000Z" itemprop="datePublished">2017-02-04</time>
@@ -74,8 +79,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+    <h1 class="article-title" itemprop="name">
+      okhttp 源码
     </h1>
   
 
@@ -106,15 +111,20 @@
     </footer>
   </div>
   
-</article>
-
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/01/09/happend-before及instruction-reorder/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Предыдущий</strong>
+      <div class="article-nav-title">happend-before及instruction-reorder的笔记</div>
+    </a>
+  
+</nav>
 
   
+</article>
 
-
-  <nav id="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/2/">__('next') &raquo;</a>
-  </nav>
 </section>
         
           <aside id="sidebar">
