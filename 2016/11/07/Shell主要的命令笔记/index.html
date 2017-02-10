@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Shell主要的命令笔记 | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="cat:
+
+原始用法: cat file1 file2  输出为两个文件的内容的一个合成结果
+
+
+接受来自标准输出作为输入流: echo ‘hello i am standard output stream | cat - test1.txt’ 就是把echo出来的内容和test1.txt内容拼接
+看看如何用cat压缩连续的空白行:cat -s file  (-s就是把多个连续的空白行只留存一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Shell主要的命令笔记">
+<meta property="og:url" content="http://yoursite.com/2016/11/07/Shell主要的命令笔记/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="cat:
+
+原始用法: cat file1 file2  输出为两个文件的内容的一个合成结果
+
+
+接受来自标准输出作为输入流: echo ‘hello i am standard output stream | cat - test1.txt’ 就是把echo出来的内容和test1.txt内容拼接
+看看如何用cat压缩连续的空白行:cat -s file  (-s就是把多个连续的空白行只留存一">
+<meta property="og:updated_time" content="2016-12-20T07:59:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Shell主要的命令笔记">
+<meta name="twitter:description" content="cat:
+
+原始用法: cat file1 file2  输出为两个文件的内容的一个合成结果
+
+
+接受来自标准输出作为输入流: echo ‘hello i am standard output stream | cat - test1.txt’ 就是把echo出来的内容和test1.txt内容拼接
+看看如何用cat压缩连续的空白行:cat -s file  (-s就是把多个连续的空白行只留存一">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Shell主要的命令笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/07/Shell主要的命令笔记/" class="article-date">
+  <time datetime="2016-11-07T02:05:09.000Z" itemprop="datePublished">2016-11-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Bash/">Bash</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Shell主要的命令笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <a id="more"></a>
+<ul>
+<li><p>cat:</p>
+<ul>
+<li>原始用法: cat file1 file2  输出为两个文件的内容的一个合成结果</li>
+</ul>
+<ol>
+<li>接受来自标准输出作为输入流: echo ‘hello i am standard output stream | cat - test1.txt’ 就是把echo出来的内容和test1.txt内容拼接</li>
+<li>看看如何用cat压缩连续的空白行:cat -s file  (-s就是把多个连续的空白行只留存一个下来)</li>
+<li>如果想要去掉所有的空白行 则需要添加一个tr命令: cat -s file | tr -s ‘\n’ 这样就可以去掉所有的空白行了。</li>
+<li>输出文件的时候如果想要看看行号在cat 后面添加一个-n即可。</li>
+</ol>
+</li>
+<li><p>rsync命令:<br>  主要用于一次性大量删除指定文件夹下的所有文件  具体用法:<br>  先建立一个空白文件夹 blank<br>  rsync –delete-before -d blank/  指定删除文件夹文件  即可一次性大量删除文件 同时保留文件夹  虽然也可以rm -R dir 但是还需要重新建立文件夹    </p>
+</li>
+<li><p>export命令:<br>  export是用来设置环境变量参数用的.诸如<em>$HOME</em>,<em>PATH</em>,<em>PDW</em>都是可以使用exprot来修改的.<br>  例如原来的$HOME =&gt; /home/qiansheng 修改为 /home/qiansheng/bin如下:<br>  export HOME=”$HOME/bin/“即可完成修改环境变量.</p>
+</li>
+<li><p>linux文件的简单操作</p>
+<ul>
+<li>cat命令一般用户显示 拼接 读取文件.实际能力不止于此.</li>
+<li>把一个echo 内容传输到指定的文件内=&gt; echo “hello” &gt; target.txt;如果想要在文件后面追加内容＝&gt; echo “world” &gt;&gt; target.txt。如果想要查看文件的内容 =&gt; cat target.txt</li>
+<li>当我们执行一个命令行的时候，结果太多在终端不好查看.可以直接把结果存放到指定的文件中去: ls &gt; target.txt</li>
+</ul>
+</li>
+<li><p>使用alias别名命令可以简化命令:</p>
+<ul>
+<li>例如在使用apt-get 来安装指定的包需要:sudo apt-get install;我想使用install来代替前者: alias install=”sudo apt-get install” 这样就可以使用install来安装包了。</li>
+<li>但是需要注意的是alias设置的别名只是暂时的，如果关闭了terminal在此开启，之前设置的alias就会失效。如果说想要持久话这个别名的话，需要把它添加到~/.bashrc里面去的.=&gt; echo “alias install=’sudo apt-get install’” &gt;&gt; ~/.bashrc</li>
+<li>每当一个新的 shell进程生成的时候,都会执行下~/.bashrc的命令。</li>
+</ul>
+</li>
+<li><p>尝试组合多个命令和工具一起输出；一个命令的输出可以作为另外一个命令的输入(需要使用到管道这个概念);</p>
+<ul>
+<li>注意 ‘|’ 这个符号，表示的是“管道”的概念,就是把前面一个命令的输出作为输入源传到下一个命令行里面去.</li>
+<li>比如说: ls | cat -n target.txt;=&gt;这个例子就是把ls命令的输出作为了输入数据输入到了target.txt文件中.并且显示行号.</li>
+</ul>
+</li>
+<li><p>find的一些其他的实用搜索技术</p>
+<ul>
+<li>根据文件访问/创建/变化时间来进行检索 =&gt; find . -type f -amin(访问时间)/-mmin(修改时间)/-cmin(变化时间) +7(超过七分钟) -print</li>
+<li>根据文件大小来进行检索的 =&gt; find . -type f -size +2k/-2k/2k</li>
+<li>删除匹配到的文件=&gt; find . -type f -name “*.java” -delete</li>
+</ul>
+</li>
+<li><p>某些命令只能接受命令行参数形式接受数据，而无法正常的通过stdin接受数据流,这样我们可以利用xargs命令，它可以把标准的 stdin 转换成特定的命令行参数.</p>
+<ul>
+<li>可以将多行输出文本作为单行输出: 假设target.txt是一个多行文本 =&gt; cat target.txt | xargs</li>
+<li>同样的 把一个单行文本转化成多行文本=&gt; cat target.txt | xargs -n 3</li>
+<li>处理标准stdin输出流称为一个规范的输入流=&gt; echo “123a123a123” | xargs -d a  结果就处理成为 123 123 123 .</li>
+<li>xargs命令就是把前面的命令的输出作为后面命令的输入</li>
+<li></li>
+</ul>
+</li>
+<li><p>精美的小工具tr的实用技巧(translate命令)</p>
+<ul>
+<li>tr只能接受标准输入流, =&gt; tr [options] set1 set2 从set1映射到set2去</li>
+<li>加密的简单哪应用  echo “123456” | tr ‘0-9’ ‘9876543210’ =&gt;输出876543  解密就是=&gt; echo “876543” | tr ‘0-9’ ‘9876543210’ =&gt; 123456.著名的ROT13加密算法就是基于字母表向右移位13对原文进行加密。</li>
+<li>删除输入流内的一些内容: echo “123adbe678” | tr -d ‘0-9’ =&gt;adbe.也就是只需要一个set就可以 相当于一个限定条件。 -d就是删除的options , 当然还有一个-c 它含义是取set的补集.-s也是很有用的一个options，可以指定字符进行压缩string.</li>
+</ul>
+<ol>
+<li>tr只能接受来自标准的输入流作为处理对象 不可以接受参数</li>
+<li>echo ‘sadjaASJHFKas’ | tr ‘A-Z’ ‘a-z’ 就是把echo输出全部转化成小写   也就是 前面的是需要转换的目标的正则表达式 后者则是目的表达式的正则表达式</li>
+<li>删除指定的字符: 通过参数-d 来指定要删除的对象。</li>
+<li>压缩指定的字符对象: 通过参数-s 来指定需要被压缩的对象.</li>
+</ol>
+</li>
+<li><p>自动大量生成模版测试文件 例如从0~100.txt:</p>
+<ol>
+<li>采用touch这个命令。它可以生成空白文件,</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">for name in &#123;0..100&#125;.txt</div><div class="line">do</div><div class="line">touch $name(即使这个name文件存在了 那么就是修改他的时间戳为最新时间)</div><div class="line">done</div></pre></td></tr></table></figure>
+<ul>
+<li><p>文件统计部分:</p>
+<ol>
+<li>wc=&gt;word count.</li>
+<li>wc -l(统计行数) -w(统计单词) -c(统计字符数)</li>
+</ol>
+</li>
+<li><p>使用ssh无密码登录</p>
+<ol>
+<li>实现原理: 基于公钥和私钥加密技术进行自动化认证。想要实现自动化认证，就必须要把客户端的公钥存放到服务器端的中的.ssh/authorized_keys文件中。</li>
+<li>客户端通过ssh-keygen来生成密钥，  ssh-keygen -t rsa 生成。生成了一个pb公钥和一个私钥。</li>
+<li>第一次给服务器添加客户端的公钥是需要密码的; ssh ssh_localhost “cat &gt;&gt; ~/.ssh/authorized_keys” &lt; ~/.ssh/id_rsa.pub 就可以实现服务器添加客户端公钥了。</li>
+</ol>
+</li>
+<li><p>进程管理的一些tips</p>
+<ol>
+<li>ps 查看详情加一个-f |||||   -e 是展示所有的进程信息  top  则是按照cpu占用情况来展示进程的信息</li>
+</ol>
+</li>
+<li><p>git的几个tips:</p>
+<ul>
+<li>在把修改内容放进了缓存区了的话,stash 然后做完了紧急事儿后需要恢复  那么只需要 git stash pop就可以了同时也删除掉了git stash list的stash缓存信息</li>
+<li>git push 一般默认的远程的origin默认仓库，所以push 的写法就是指定一个仓库 以及分支 所以格式如下: git push origin(默认仓库) master(默认分支)</li>
+<li>有时候pull的时候需要两个分支对应好  不能本地的分支跟远程分支不对应起来git branch –set-upstream dev origin/dev 这样就建立本地分支和远程分支的关联</li>
+<li>标签管理: 用的比较少呢。</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/11/07/Shell主要的命令笔记/" data-id="ciyzkr3aq0000gms6wpzwaqxr" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          虚拟机遇到new指令,发生了什么
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/10/10/一些疑问记录-待答-/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">一些疑问记录(待答).md</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Bash/">Bash</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/JVM/">JVM</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/gc/">gc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/jvm/">jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/序列化协议/">序列化协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bash/">Bash</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Code/">Code</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java并发/">Java并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Okhttp/">Okhttp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/序列化协议/">序列化协议</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Bash/" style="font-size: 10px;">Bash</a> <a href="/tags/Code/" style="font-size: 10px;">Code</a> <a href="/tags/Gradle-构建工具/" style="font-size: 10px;">Gradle 构建工具</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Java并发/" style="font-size: 10px;">Java并发</a> <a href="/tags/Okhttp/" style="font-size: 10px;">Okhttp</a> <a href="/tags/Runtime-Changed/" style="font-size: 10px;">Runtime Changed</a> <a href="/tags/jvm/" style="font-size: 20px;">jvm</a> <a href="/tags/序列化协议/" style="font-size: 10px;">序列化协议</a> <a href="/tags/统计java代码量/" style="font-size: 10px;">统计java代码量</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">February 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">January 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
