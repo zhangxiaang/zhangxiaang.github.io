@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>I/O | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。
+输出流负责写入数据，输入流负责负责读取数据。相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I/O">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/02/21/I-O/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。
+输出流负责写入数据，输入流负责负责读取数据。相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而">
+<meta property="og:updated_time" content="2017-02-21T08:18:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="I/O">
+<meta name="twitter:description" content="java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。
+输出流负责写入数据，输入流负责负责读取数据。相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-I-O" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/02/21/I-O/" class="article-date">
+  <time datetime="2017-02-21T07:58:17.000Z" itemprop="datePublished">2017-02-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      I/O
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。</p>
+<p>输出流负责写入数据，输入流负责负责读取数据。<br>相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可<br>能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而是暂存于缓冲区中。<br>在处理输入流的时候一般都是一个一个字节的读取输入流内的数据，不过也可以通过一段缓冲区来指定读取的字节数:</p>
+<pre><code>byte[] buffer = new buffer[1024];
+while(inputStream.read(buffer) != -1){
+    outputStream.write(buffer);
+}
+</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cizf9elix0003rds6jxk1lllu" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/02/04/okhttp-源码/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">okhttp 源码</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/02/21/I-O/">I/O</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
