@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="张翔的博客">
 <meta property="og:description" content="java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。
 输出流负责写入数据，输入流负责负责读取数据。相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而">
-<meta property="og:updated_time" content="2017-02-21T08:18:35.000Z">
+<meta property="og:updated_time" content="2017-02-23T06:39:00.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="I/O">
 <meta name="twitter:description" content="java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。
@@ -55,7 +55,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="검색"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -92,12 +92,12 @@
 while(inputStream.read(buffer) != -1){
     outputStream.write(buffer);
 }
-</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?</p>
+</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?<br>或者把输入输出流以buffer作为基准，输入流需要把文件的内容输出到这一块buffer来，所以对应的是 read 方法，对应的输出流则是把buffer的内容输入到文件内所以对应的方法是write。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cizf9elix0003rds6jxk1lllu" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cizi0q9oq0002kqs6xgg1dkcc" class="article-share-link">공유</a>
       
       
     </footer>
@@ -108,7 +108,7 @@ while(inputStream.read(buffer) != -1){
   
   
     <a href="/2017/02/04/okhttp-源码/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
+      <strong class="article-nav-caption">이전</strong>
       <div class="article-nav-title">okhttp 源码</div>
     </a>
   
@@ -123,7 +123,7 @@ while(inputStream.read(buffer) != -1){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">최근 포스트</h3>
     <div class="widget">
       <ul>
         

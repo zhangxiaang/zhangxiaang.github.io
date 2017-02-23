@@ -48,7 +48,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="검색"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -87,12 +87,12 @@
 while(inputStream.read(buffer) != -1){
     outputStream.write(buffer);
 }
-</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?</p>
+</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?<br>或者把输入输出流以buffer作为基准，输入流需要把文件的内容输出到这一块buffer来，所以对应的是 read 方法，对应的输出流则是把buffer的内容输入到文件内所以对应的方法是write。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cizf9elix0003rds6jxk1lllu" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cizi0q9oq0002kqs6xgg1dkcc" class="article-share-link">공유</a>
       
       
     </footer>
@@ -139,7 +139,7 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cizf9eljd000brds6wjopjixw" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cizi0q9pa000ekqs6dt2h2jb4" class="article-share-link">공유</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
@@ -178,7 +178,7 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/09/happend-before及instruction-reorder/" data-id="cizf9elj50008rds6garo3tqg" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/01/09/happend-before及instruction-reorder/" data-id="cizi0q9p20007kqs6fvz58987" class="article-share-link">공유</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java并发/">Java并发</a></li></ul>
@@ -224,7 +224,7 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/09/关于DCL的笔记/" data-id="cizf9eljo000jrds6pux1xrk6" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/01/09/关于DCL的笔记/" data-id="cizi0q9pn000okqs6mtsxy2cc" class="article-share-link">공유</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
@@ -240,7 +240,7 @@ while(inputStream.read(buffer) != -1){
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">다음 &raquo;</a>
   </nav>
 
 </section>
@@ -249,7 +249,7 @@ while(inputStream.read(buffer) != -1){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">최근 포스트</h3>
     <div class="widget">
       <ul>
         
