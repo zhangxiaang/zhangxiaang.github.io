@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>AndroidTV焦点移动.md | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="tv开发跟手机开发最大的不同点应该就是焦点的处理问题了，在手机开发中我们基本不太需要关心焦点的移动问题，然而在电视开发中焦点不是由触屏控制而是被遥控器控制着，所以很容易出现诸如焦点不见了，焦点移动位置不正确之类的问题。正常情况下我们可以通过设置view的nextFocusDown/Up/Left/Right来控制焦点的走向，然而通过这种hardcode方式不能很好的解决某些问题: 诸如现在有这么一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidTV焦点移动.md">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/03/09/AndroidTV焦点移动-md/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="tv开发跟手机开发最大的不同点应该就是焦点的处理问题了，在手机开发中我们基本不太需要关心焦点的移动问题，然而在电视开发中焦点不是由触屏控制而是被遥控器控制着，所以很容易出现诸如焦点不见了，焦点移动位置不正确之类的问题。正常情况下我们可以通过设置view的nextFocusDown/Up/Left/Right来控制焦点的走向，然而通过这种hardcode方式不能很好的解决某些问题: 诸如现在有这么一">
+<meta property="og:updated_time" content="2017-03-09T08:21:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AndroidTV焦点移动.md">
+<meta name="twitter:description" content="tv开发跟手机开发最大的不同点应该就是焦点的处理问题了，在手机开发中我们基本不太需要关心焦点的移动问题，然而在电视开发中焦点不是由触屏控制而是被遥控器控制着，所以很容易出现诸如焦点不见了，焦点移动位置不正确之类的问题。正常情况下我们可以通过设置view的nextFocusDown/Up/Left/Right来控制焦点的走向，然而通过这种hardcode方式不能很好的解决某些问题: 诸如现在有这么一">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-AndroidTV焦点移动-md" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/09/AndroidTV焦点移动-md/" class="article-date">
+  <time datetime="2017-03-09T03:48:17.000Z" itemprop="datePublished">2017-03-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      AndroidTV焦点移动.md
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tv开发跟手机开发最大的不同点应该就是焦点的处理问题了，在手机开发中我们基本不太需要关心焦点的移动问题，然而在电视开发中焦点不是由触屏控制而是被遥控器控制着，所以很容易出现诸如焦点不见了，焦点移动位置不正确之类的问题。正常情况下我们可以通过设置view的nextFocusDown/Up/Left/Right来控制焦点的走向，然而通过这种hardcode方式不能很好的解决某些问题: 诸如现在有这么一个需求:<br>    购物导航栏中有多个商品tab,每一个tab对应着一个fragment,而每一个fragment的内容是一个gridRecyclerView. 当用户在浏览商品的时候,滑到当前fragment的最右边的商品的时候，用户继续向右方向需要把焦点放到下一个tab页中grid中的第一项商品。此时就需要我们自定来处理焦点问题了，如果不处理的话, 焦点只会停留在当前商品item中。</p>
+<p>处理焦点中入口函数是ViewRootImpl的processKeyEvent()函数，暂且不考虑key事件分发的过程,只考虑系统是如何解决自动找寻焦点的关键部分。其中比较重要的两个函数分别是<em>view.focusSearch()</em>以及<em>requestFocus(int,rect)</em> 前者是view搜寻焦点的函数，也是我们主要需要重写的函数。</p>
+<p>在自动找寻焦点过程中首先要做的是定下焦点移动的方向, 是通过keycode来判断上下左右(然而在android软键盘中有个坑,nexus 5x的软键盘和系统规定的软键盘的keycode居然不一致?).<br>定下方向后就通过focusSearch来找到下一个获取焦点view(复写的话基本能找到正确的焦点目标), 紧接着需要做的就是划出当前view聚焦范围的rect,提供给后续的需要。<br>然后就是给v(聚焦目标view)调用requestFocus，执行焦点转移；倘若焦点转移成功则表示一次焦点的切换工作完成；否则的话还会执行一次“补救操作”，调用当前view的dispatchUnhandledMove(focused, direction)来处理既没有被系统处理也没有被当前view处理的焦点切换工作，所以可以把这个函数作为容错函数，类似finally的功能。<br>如果findFocus返回的view为空表明系统当前并没有对象获取到焦点，那么还是从focusSearch来入口，只不过第一个参数传入的为null.</p>
+<p>综上可见focusSearch是最重要的函数，其次就是requestFocus函数，来看看他们的内部实现是怎样的。</p>
+<p>其次需要关注的就是keyEvent的传递路径。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/03/09/AndroidTV焦点移动-md/" data-id="cj0jghhd90003bsbyqm0dznwy" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/焦点/">焦点</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/03/21/synchronized-vs-volatile/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          synchronized vs volatile.md
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/02/21/I-O/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">I/O</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/21/I-O/">I/O</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

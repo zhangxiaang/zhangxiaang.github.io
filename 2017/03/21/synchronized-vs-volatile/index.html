@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>synchronized vs volatile.md | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="java的线程内存模型分为了主内存和工作线程, 由于线程运行于不同的CPU中, 所以说不同的线程是没办法读取到彼此之间的内存数据的, 而多个线程之所以看起来能够操作主内存的某一个共享变量, 实际的过程是各个线程把此变量copy到自己的工作内存中，实际是对copy的操作，最后刷入到主内存中。而此过程中各个线程无法确保自己copy到的变量的值就是最新的值, 比方说十个线程对同一个变量执行+1操作, 可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized vs volatile.md">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="java的线程内存模型分为了主内存和工作线程, 由于线程运行于不同的CPU中, 所以说不同的线程是没办法读取到彼此之间的内存数据的, 而多个线程之所以看起来能够操作主内存的某一个共享变量, 实际的过程是各个线程把此变量copy到自己的工作内存中，实际是对copy的操作，最后刷入到主内存中。而此过程中各个线程无法确保自己copy到的变量的值就是最新的值, 比方说十个线程对同一个变量执行+1操作, 可">
+<meta property="og:updated_time" content="2017-03-21T11:27:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="synchronized vs volatile.md">
+<meta name="twitter:description" content="java的线程内存模型分为了主内存和工作线程, 由于线程运行于不同的CPU中, 所以说不同的线程是没办法读取到彼此之间的内存数据的, 而多个线程之所以看起来能够操作主内存的某一个共享变量, 实际的过程是各个线程把此变量copy到自己的工作内存中，实际是对copy的操作，最后刷入到主内存中。而此过程中各个线程无法确保自己copy到的变量的值就是最新的值, 比方说十个线程对同一个变量执行+1操作, 可">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-synchronized-vs-volatile" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/21/synchronized-vs-volatile/" class="article-date">
+  <time datetime="2017-03-21T10:43:48.000Z" itemprop="datePublished">2017-03-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      synchronized vs volatile.md
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>java的线程内存模型分为了主内存和工作线程, 由于线程运行于不同的CPU中, 所以说不同的线程是没办法读取到彼此之间的内存数据的, 而多个线程之所以看起来能够操作主内存的某一个共享变量, 实际的过程是各个线程把此变量copy到自己的工作内存中，实际是对copy的操作，最后刷入到主内存中。而此过程中各个线程无法确保自己copy到的变量的值就是最新的值, 比方说十个线程对同一个变量执行+1操作, 可能第十个线程去copy这个变量的时候其他九个线程还没把最新的执行结果刷入到主内存中，导致第十个线程+1得到的结果不等于原来的变量+10的期望值。所以需要来保证线程的安全性</p>
+<p>synchronized:</p>
+<p>synchronized修饰的是某一个变量或者方法, 保证它所在的内存块加了一个同步锁, 每一个线程对synchronized修饰过了的内存区域操作的时候都会获取同步锁, 只有获取了同步锁的线程才可以操作住内存, 在释放同步锁的时候把最新值刷入到住内存中。依靠锁的唯一可获取性保证了共享内存的正确性.</p>
+<p>volatile:</p>
+<p>保证了多个线程之间共享变量的可见性, (默认的情况下操作一个共享变量是先把这个变量copy到自己的工作内存执行操作的, 导致其他线程对共享内存的最新值的不可见性)<br>既然synchronized的原理是给内存块添加同步锁,那么volatile的实现原理是什么呢?<br>通过编译后对比没有添加volatile的变量, 发现有volatile变量编译后多了一条指令:<br>lock addl $0x0,(%esp);<br>这条指令保证了两件事:</p>
+<ul>
+<li>当前线程的工作区域中被volatile修饰的内存块的数据刷新到主内存中；(保证主内存中是最新值)</li>
+<li>此刷新当前线程的工作内存中变量值到主内存的同时还会导致其他线程中的工作内存中缓存的该共享变量地址指向的数据值无效.(剔除了非最新值对住内存中共享变量值污染的可能性)。</li>
+</ul>
+<p>虽然volatile的消耗低,但是volatile只是提供了变量的可见性(具体方式参考上面说的),却没有提供原子性,(synchronized的原子性由锁的特征提供).这会导致一些问题,诸如多线程计数不准确问题.</p>
+<p>//todo 复习一下什么是原子性操作</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj0jghhdx000cbsbym24gyh8q" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/03/09/AndroidTV焦点移动-md/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">AndroidTV焦点移动.md</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/21/I-O/">I/O</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

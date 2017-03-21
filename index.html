@@ -59,6 +59,96 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-synchronized-vs-volatile" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/21/synchronized-vs-volatile/" class="article-date">
+  <time datetime="2017-03-21T10:43:48.000Z" itemprop="datePublished">2017-03-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>java的线程内存模型分为了主内存和工作线程, 由于线程运行于不同的CPU中, 所以说不同的线程是没办法读取到彼此之间的内存数据的, 而多个线程之所以看起来能够操作主内存的某一个共享变量, 实际的过程是各个线程把此变量copy到自己的工作内存中，实际是对copy的操作，最后刷入到主内存中。而此过程中各个线程无法确保自己copy到的变量的值就是最新的值, 比方说十个线程对同一个变量执行+1操作, 可能第十个线程去copy这个变量的时候其他九个线程还没把最新的执行结果刷入到主内存中，导致第十个线程+1得到的结果不等于原来的变量+10的期望值。所以需要来保证线程的安全性</p>
+<p>synchronized:</p>
+<p>synchronized修饰的是某一个变量或者方法, 保证它所在的内存块加了一个同步锁, 每一个线程对synchronized修饰过了的内存区域操作的时候都会获取同步锁, 只有获取了同步锁的线程才可以操作住内存, 在释放同步锁的时候把最新值刷入到住内存中。依靠锁的唯一可获取性保证了共享内存的正确性.</p>
+<p>volatile:</p>
+<p>保证了多个线程之间共享变量的可见性, (默认的情况下操作一个共享变量是先把这个变量copy到自己的工作内存执行操作的, 导致其他线程对共享内存的最新值的不可见性)<br>既然synchronized的原理是给内存块添加同步锁,那么volatile的实现原理是什么呢?<br>通过编译后对比没有添加volatile的变量, 发现有volatile变量编译后多了一条指令:<br>lock addl $0x0,(%esp);<br>这条指令保证了两件事:</p>
+<ul>
+<li>当前线程的工作区域中被volatile修饰的内存块的数据刷新到主内存中；(保证主内存中是最新值)</li>
+<li>此刷新当前线程的工作内存中变量值到主内存的同时还会导致其他线程中的工作内存中缓存的该共享变量地址指向的数据值无效.(剔除了非最新值对住内存中共享变量值污染的可能性)。</li>
+</ul>
+<p>虽然volatile的消耗低,但是volatile只是提供了变量的可见性(具体方式参考上面说的),却没有提供原子性,(synchronized的原子性由锁的特征提供).这会导致一些问题,诸如多线程计数不准确问题.</p>
+<p>//todo 复习一下什么是原子性操作</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj0jghhdx000cbsbym24gyh8q" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-AndroidTV焦点移动-md" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/09/AndroidTV焦点移动-md/" class="article-date">
+  <time datetime="2017-03-09T03:48:17.000Z" itemprop="datePublished">2017-03-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tv开发跟手机开发最大的不同点应该就是焦点的处理问题了，在手机开发中我们基本不太需要关心焦点的移动问题，然而在电视开发中焦点不是由触屏控制而是被遥控器控制着，所以很容易出现诸如焦点不见了，焦点移动位置不正确之类的问题。正常情况下我们可以通过设置view的nextFocusDown/Up/Left/Right来控制焦点的走向，然而通过这种hardcode方式不能很好的解决某些问题: 诸如现在有这么一个需求:<br>    购物导航栏中有多个商品tab,每一个tab对应着一个fragment,而每一个fragment的内容是一个gridRecyclerView. 当用户在浏览商品的时候,滑到当前fragment的最右边的商品的时候，用户继续向右方向需要把焦点放到下一个tab页中grid中的第一项商品。此时就需要我们自定来处理焦点问题了，如果不处理的话, 焦点只会停留在当前商品item中。</p>
+<p>处理焦点中入口函数是ViewRootImpl的processKeyEvent()函数，暂且不考虑key事件分发的过程,只考虑系统是如何解决自动找寻焦点的关键部分。其中比较重要的两个函数分别是<em>view.focusSearch()</em>以及<em>requestFocus(int,rect)</em> 前者是view搜寻焦点的函数，也是我们主要需要重写的函数。</p>
+<p>在自动找寻焦点过程中首先要做的是定下焦点移动的方向, 是通过keycode来判断上下左右(然而在android软键盘中有个坑,nexus 5x的软键盘和系统规定的软键盘的keycode居然不一致?).<br>定下方向后就通过focusSearch来找到下一个获取焦点view(复写的话基本能找到正确的焦点目标), 紧接着需要做的就是划出当前view聚焦范围的rect,提供给后续的需要。<br>然后就是给v(聚焦目标view)调用requestFocus，执行焦点转移；倘若焦点转移成功则表示一次焦点的切换工作完成；否则的话还会执行一次“补救操作”，调用当前view的dispatchUnhandledMove(focused, direction)来处理既没有被系统处理也没有被当前view处理的焦点切换工作，所以可以把这个函数作为容错函数，类似finally的功能。<br>如果findFocus返回的view为空表明系统当前并没有对象获取到焦点，那么还是从focusSearch来入口，只不过第一个参数传入的为null.</p>
+<p>综上可见focusSearch是最重要的函数，其次就是requestFocus函数，来看看他们的内部实现是怎样的。</p>
+<p>其次需要关注的就是keyEvent的传递路径。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/03/09/AndroidTV焦点移动-md/" data-id="cj0jghhd90003bsbyqm0dznwy" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/焦点/">焦点</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-I-O" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/02/21/I-O/" class="article-date">
@@ -95,7 +185,7 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj01uqb5q000e9lbyt5ugczbg" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj0jghhde0004bsbytyry4g8y" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -142,95 +232,10 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cj01uqb5x000l9lbycs0aht79" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cj0jghhe7000jbsbyrzxyng83" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-happend-before及instruction-reorder" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/01/09/happend-before及instruction-reorder/" class="article-date">
-  <time datetime="2017-01-09T11:10:45.000Z" itemprop="datePublished">2017-01-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这个概念非常重要,对于理解同步,volatile,非常有帮助.<br>依旧需要结合DCL的问题来</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/09/happend-before及instruction-reorder/" data-id="cj01uqb5k00099lbydbyr8sw3" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java并发/">Java并发</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-关于DCL的笔记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/01/09/关于DCL的笔记/" class="article-date">
-  <time datetime="2017-01-09T08:04:37.000Z" itemprop="datePublished">2017-01-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>装逼用的是说DCL ,其实就是double check lock,如下代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton mInstance = <span class="keyword">null</span>;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">if</span>(mInstance == <span class="keyword">null</span>)&#123;</div><div class="line">			<span class="keyword">synchronized</span> (Singletom.class)&#123;</div><div class="line">				<span class="keyword">if</span>(mInstance == <span class="keyword">null</span>)&#123;</div><div class="line">					mInstance = <span class="keyword">new</span> Singleton();</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> mInstance;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>以上就是为了解决并发环境下获取单例实例的一个写法, 第一个判空是为了避免不必要的同步代码操作，第二个判空则是为了保证只执行一次实例操作。<br>当执行到了 <code>mInstance = new Singleton();</code> 也就是实例化一个类对象的时候，粗略的看来是完成了三个操作:(可参考 <a href="https://zhangxiaang.github.io/2016/11/07/%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%81%87%E5%88%B0new%E6%8C%87%E4%BB%A4%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/">虚拟机遇到new时内存分配</a>)</p>
-<pre><code>* 为类实例分配内存;
-* 调用类默认构造函数;
-* 将分配好了的内存空间地址指针指向类实例(此时的mInstance == null就不成立了)
-</code></pre><p>(由此可得,类对象是否成功的实例化的依据是类引用指向了内存指定的地址而不是调用了构造函数)<br>由于在JDK1.5之前的JMM(java memory model)中规定,第二条和第三条的执行顺序不可定,如果线程1是1,2,3的顺序执行实例化操作,在任何一个步骤中有外来线程调用getInstance()都不会有问题的;但是如果线程1是1,3,2的顺序来执行实例化操作的话,外来线程调用到了getInstance()函数,此时的构造函数并没有调用到而只是分配到了内存空间,此时的外来线程如果获取到instance从而去执行某个类函数的话就会因尚未执行构造函数导致异常的发生.<br>解决方法就是给mInstance添加volatile修饰,这样可以保证读取的instance都是从主内存中获取的，保证了读的一致性。</p>
-<p>当然咯,DCL不是最好的选择,用下面的就可以了.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> SingletonHolder.sInstance;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span></span>&#123;</div><div class="line">		<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton mInstance = <span class="keyword">new</span> Singleton();</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/09/关于DCL的笔记/" data-id="cj01uqb64000t9lby5hu9hq1v" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
 
     </footer>
   </div>
@@ -257,6 +262,14 @@ while(inputStream.read(buffer) != -1){
       <ul>
         
           <li>
+            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
+          </li>
+        
+          <li>
             <a href="/2017/02/21/I-O/">I/O</a>
           </li>
         
@@ -266,14 +279,6 @@ while(inputStream.read(buffer) != -1){
         
           <li>
             <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
           </li>
         
       </ul>
