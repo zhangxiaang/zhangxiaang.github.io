@@ -88,15 +88,32 @@
 <p>保证了多个线程之间共享变量的可见性, (默认的情况下操作一个共享变量是先把这个变量copy到自己的工作内存执行操作的, 导致其他线程对共享内存的最新值的不可见性)<br>既然synchronized的原理是给内存块添加同步锁,那么volatile的实现原理是什么呢?<br>通过编译后对比没有添加volatile的变量, 发现有volatile变量编译后多了一条指令:<br>lock addl $0x0,(%esp);<br>这条指令保证了两件事:</p>
 <ul>
 <li>当前线程的工作区域中被volatile修饰的内存块的数据刷新到主内存中；(保证主内存中是最新值)</li>
-<li>此刷新当前线程的工作内存中变量值到主内存的同时还会导致其他线程中的工作内存中缓存的该共享变量地址指向的数据值无效.(剔除了非最新值对住内存中共享变量值污染的可能性)。</li>
+<li>刷新当前线程的工作内存中变量值到主内存的同时还会导致其他线程中的工作内存中缓存的该共享变量地址指向的数据值无效.(剔除了非最新值对住内存中共享变量值污染的可能性)。</li>
 </ul>
 <p>虽然volatile的消耗低,但是volatile只是提供了变量的可见性(具体方式参考上面说的),却没有提供原子性,(synchronized的原子性由锁的特征提供).这会导致一些问题,诸如多线程计数不准确问题.</p>
-<p>//todo 复习一下什么是原子性操作</p>
+<p>原子操作指的是一组不可被中断的操作, 以i++为例子, 它实际上包含了load(from main memory) , add(in work memory) ,save(to main memory) 三个操作, 在多处理器环境中同时执行这个操作就可能导致这组指令被打断, 可能在cpu1在执行add指令还没执行到save指令的时候, cpu2就从main memory中load i的值此时的i并非是最新的value. 因此说i++操作不是一个原子性的操作. 需要借助concurrent包里面的atomaticInteger来实现此目的, 它确保了一个操作的原子性, 那么是如何实现的呢?</p>
+<p>volatile实现了一个目标: 确保了其他线程读取到的i变量是最新的value,然而离计算出正确的i的值还缺少一个步骤: 如何保证多个线程在load到最新的值之后依次的把各自内存中修改过后的变量i save到主内存中? 然而volatile限制了这个功能: 被volatile修饰过的变量的值一旦被改动,将会导致拷贝了此变量到工作内存中的其他线程无法再次操作这个变量的副本, 也无法save回主内存. 所以用volatile的话还是得同时配合synchronized来实现线程安全的目标啊.例如DCL</p>
+<p>那么原子操作的实现原理是什么呢?<br>锁就不说了,说说compare and swap算法来实现自旋CAS —&gt; 自旋CAS实现的基本思路就是循环进行CAS操作直到成功为止<br>那么单次的CAS是怎样的呢?</p>
+<pre><code>boolean compareAndSwap(int mainmemoryValue,int workmemoryOldValue,int workMemoryNewValue){
+    if(mainMemoryValue != workMemoryOldValue){
+        return false;
+    }
+    mainmemoryValue = workMemoryNewValue;
+    return true;
+}
+</code></pre><p>以上是java伪代码, 实际上的实现是c++完成的, 唯一的不同就是此算法的第一个参数是一个指向mainMemory的变量的一个指针, 只有当来自workMemory的变量值等于主内存中该变量的值的时候才能认为是衔接上一条指令的操作，将workMemory中最新的值刷入到主内存指针指向的value.从而保证了一组操作的原子性。</p>
+<p>CAS依旧存在的限制:</p>
+<ul>
+<li><p>ABA问题:<br>  两个进程, 一个进程在load到主线程变量A的值后因某种原因挂掉了, 后来的进程2再次load这个变量A把他的值从1改到了10再从10改回了1, 此时的进程1重启了发现变量A的值没有改变, 那么进程1是无法感知到进程2对变量a的1-&gt;10,10-&gt;1的这个过程。可能在java中只是值的变动感知不到这个影响,但是如果发生在c＋＋中的指针比较交换的话，就容易发生问题: 具体的例子参考wiki <img src="https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2" alt="比较并交换"> </p>
+</li>
+<li><p>由于自旋的过程就是不断的执行cas，倘若cas长时间不成功, 就导致cpu长时间的空转</p>
+</li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj0jghhdx000cbsbym24gyh8q" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj0km6vho000iu7by7jpnv1ji" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -137,7 +154,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/09/AndroidTV焦点移动-md/" data-id="cj0jghhd90003bsbyqm0dznwy" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/09/AndroidTV焦点移动-md/" data-id="cj0km6vgy0002u7byvnp1j0dk" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/焦点/">焦点</a></li></ul>
@@ -185,7 +202,7 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj0jghhde0004bsbytyry4g8y" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj0km6vhb0007u7by17pm17sc" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -232,7 +249,7 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cj0jghhe7000jbsbyrzxyng83" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cj0km6vi1000tu7byshlh2h1c" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
