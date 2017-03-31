@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ServiceManager | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ServiceManager作为一个Binder(Service)的管理中心，是理解android中Binder通信原理的重要环节之一:
+
+为了管理Binder(Service)，需要如下几个函数:
+
+getService(String serviceName);
+checkService(String serviceName);
+addService(String serviceName);">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ServiceManager">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/03/31/ServiceManager/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="ServiceManager作为一个Binder(Service)的管理中心，是理解android中Binder通信原理的重要环节之一:
+
+为了管理Binder(Service)，需要如下几个函数:
+
+getService(String serviceName);
+checkService(String serviceName);
+addService(String serviceName);">
+<meta property="og:updated_time" content="2017-03-31T08:20:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ServiceManager">
+<meta name="twitter:description" content="ServiceManager作为一个Binder(Service)的管理中心，是理解android中Binder通信原理的重要环节之一:
+
+为了管理Binder(Service)，需要如下几个函数:
+
+getService(String serviceName);
+checkService(String serviceName);
+addService(String serviceName);">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ServiceManager" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/31/ServiceManager/" class="article-date">
+  <time datetime="2017-03-31T08:19:31.000Z" itemprop="datePublished">2017-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ServiceManager
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li><p>ServiceManager作为一个Binder(Service)的管理中心，是理解android中Binder通信原理的重要环节之一:</p>
+<ul>
+<li><p>为了管理Binder(Service)，需要如下几个函数:</p>
+<ul>
+<li>getService(String serviceName);</li>
+<li>checkService(String serviceName);</li>
+<li>addService(String serviceName);</li>
+<li>listService();</li>
+</ul>
+</li>
+<li><p>所以把如上的功能抽象为一个接口也就是IServiceManager，而此接口需要继承IInterface接口 //TODO 为何要继承它呢 ?</p>
+</li>
+<li><p>ServiceManager需要实现的这些功能，然而它没有继承这个IServiceManager而是持有着IServiceManager对象，任何的上述操作都会转交给IServiceManager对象去执行，也就是一个单纯的代理关系。</p>
+</li>
+<li><p>IServiceManager的初始化是调用了ServiceManagerNative.asInterface(BinderInternal.getContextObject());在这个asInterface()函数中需要注意了：</p>
+<ul>
+<li>首先，getContextObject()这个函数获取的是应用的全局Context对象，可以把他看做是一个应用层跟底层Binder沟通的对象即可。—–&gt; obj = context(Ibinder对象);<br>l</li>
+<li>其次在判断这个context对象不为空后去实例化IServiceManager对象，IServiceManager in = (IServiceManager)obj.queryLocalInterface(“android.os.IServiceManager”);那么在queryLocal(Binder?)过程发生了什么?<ul>
+<li>遍历所有实现了Binder对象(也就是查询Service)的接口的本地对象，如果本地没有一个serviceManager对象的话，选择下一步</li>
+<li>如果本地没有任何ServiceManager对象，那么就执行new ServiceManagerProxy(obj). 那么这个代理是干嘛的呢?</li>
+</ul>
+</li>
+<li>当本地并没有一个IServiceManager的存在的话，就需要去创建一个ServiceManagerProxy对象，它实现了IServiceManager接口，作为一个内部类存在于ServiceManagerNative中。内部结构如下:<ul>
+<li>持有一个用户内存空间的binder对象，也就是记录下这个用户内存空间里的Binder对象(Service)。</li>
+<li>初始化过程也是建立用户内存空间的IBinder对象 == mRemote 的联系</li>
+<li>getService(String serviceName):获取Service的流程:<ul>
+<li>初始化两个Parcel对象一个用来装想要获取的service的信息，一个作为存储来自查询结果(也就是一个IBinder对象)的。</li>
+<li>通过用户内存空间上的IBinder对象的transact(GET_SERVICE_TRANSACTION, data, reply, 0)函数实现向真正的ServiceManager查询serviceName的过程。</li>
+<li>transact()函数的实现过程中让clientBinder进入到内核态挂起，binder驱动最终会唤醒server端的onTransact(int code, Parcel data, Parcel reply, int flags)函数。在server端执行的操作就是读取client端传入的参数，调用getService(string name)函数从而得到IBinder对象，装入到reply流中去。  (由此可见，ServiceManager本身也是一个特殊的Binder对象，查询serviceName都经过了client发送binder数据到binder驱动，驱动再次发送binder数据到managerService这整个流程.可以查看ServiceManagerNative这个类，本身是继承了Binder对象的。)  //疑问 这个transact函数是如何确定一个serverBinder对象呢？也就是说binder驱动如何判定调用哪个binder的onTransact函数呢?<ul>
+<li>而实际上这个查询的过程可以通过一个缓存来解决HashMap<string, ibinder=""> sCache。</string,></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>最终的结果就是实现了ServiceManager中的IServiceManager对象 == new ServiceManagerProxy()对象的结果。完成client端的ServiceManager(也就是一个ServiceManagerProxy对象)的初始化过程。</li>
+</ul>
+</li>
+<li><p>而最重要的ServiceManagerNative的初始化工作只做了一件事儿:</p>
+<ul>
+<li>调用Binder的attachInterface(this,descriptor)的工作，正式的把serviceManager对象跟Binder类中的IInterface mOwner绑定在一起。</li>
+<li>而Binder类中的queryLocalInterface()函数返回的就是这个mOwner对象。</li>
+<li>可见，此时的ServiceManagerNative就是一个server端的binder对象。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj0xk72or0004fyby97pfjwk3" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/03/21/synchronized-vs-volatile/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">synchronized vs volatile.md</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/21/I-O/">I/O</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

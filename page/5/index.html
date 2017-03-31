@@ -59,6 +59,53 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-统计代码量" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/01/统计代码量/" class="article-date">
+  <time datetime="2016-03-01T11:42:35.000Z" itemprop="datePublished">2016-03-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Bash/">Bash</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/01/统计代码量/">统计Android项目java文件代码量</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>切到项目的java文件目录下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ find . <span class="string">"("</span> -name <span class="string">"*.java"</span> <span class="string">")"</span> -print | xargs wc <span class="_">-l</span></div></pre></td></tr></table></figure></p>
+<p>即可获取到java文件的代码量</p>
+<p>add</p>
+<p>批量修改指定文件夹下的匹配上的字符串</p>
+<p>find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2016/03/01/统计代码量/" data-id="cj0xk72qk001afybymtpopxme" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-ThreadLocal的工作原理" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/12/02/ThreadLocal的工作原理/" class="article-date">
@@ -94,7 +141,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/12/02/ThreadLocal的工作原理/" data-id="cj0km6vhn000gu7byb7hbc546" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2015/12/02/ThreadLocal的工作原理/" data-id="cj0xk72p9000bfybybq9np73z" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -143,7 +190,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/11/16/关于broadcastReceiver与service交互时调用peekService的疑问/" data-id="cj0km6vi3000vu7bytux17jbq" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2015/11/16/关于broadcastReceiver与service交互时调用peekService的疑问/" data-id="cj0xk72qf0017fyby4sg51flb" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -189,7 +236,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/08/02/处理Runtime-Changed的官方建议/" data-id="cj0km6vi70010u7bypvcrx5i4" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2015/08/02/处理Runtime-Changed的官方建议/" data-id="cj0xk72qb0012fybylam6a8wu" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li></ul>
@@ -201,58 +248,11 @@
 
 
   
-    <article id="post-Bitmap相关tips的笔记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/05/10/Bitmap相关tips的笔记/" class="article-date">
-  <time datetime="2015-05-10T06:42:00.000Z" itemprop="datePublished">2015-05-10</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Android/">Android</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/10/Bitmap相关tips的笔记/">Bitmap相关tips的笔记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>&nbsp;&nbsp;掌握如何使用通用的技术来加载bitmap对象是保证UI界面流畅性的前提之一。如果在应用中不注意这一点的话，bitmap对象很快就消耗掉应用的内存，最终导致内存溢出异常。</p>
-<pre><code>java.lang.OutofMemoryError:bitmap size exceeds VM budget
-</code></pre><p>&nbsp;&nbsp;下面的内容就是如何在android中高效加载Bitmap的一些tips，参考自官网的training。<br>
-        
-          <p class="article-more-link">
-            <a href="/2015/05/10/Bitmap相关tips的笔记/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/05/10/Bitmap相关tips的笔记/" data-id="cj0km6vh10003u7by6hj9zmp5" class="article-share-link">Teilen</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/4/">&laquo; zurück</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
+    <a class="extend prev" rel="prev" href="/page/4/">&laquo; zurück</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/6/">weiter &raquo;</a>
   </nav>
 
 </section>
@@ -264,6 +264,10 @@
     <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
+          </li>
         
           <li>
             <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
@@ -279,10 +283,6 @@
         
           <li>
             <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
           </li>
         
       </ul>
