@@ -48,7 +48,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -58,55 +58,6 @@
 </header>
       <div class="outer">
         <section id="main">
-  
-    <article id="post-okhttp-源码" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/02/04/okhttp-源码/" class="article-date">
-  <time datetime="2017-02-04T06:09:53.000Z" itemprop="datePublished">2017-02-04</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>整个okHttp源码最为核心的部分就是Interceptor了,它负责了实际的网络请求、错误重发、缓存、压缩、解析等一系列的实质性的工作，而其中的每一项工作都是具有独立的Interceptor来完成对应的工作.也就是一个典型的责任链模式,而每一个Interceptor所在chain的位置决定了它的功能,例如请求服务器数据 和 解析服务器返回的数据就应该在此责任链的尾部.</p>
-<p>在阅读源码的过程中,着重了解okHttp的 <em>request缓存策略</em>, <em>Interceptor实现机制以及Interceptor的Chain机制</em>, <em>dispacher下发Call的机制</em>, <em>路由原理</em>, <em>连接池如何减少延迟</em>,<em>HttpEngine</em>是如何处理核心事务(request-&gt;response)以及学一学如何用一门语言来<em>实现传输协议</em>(不限于java来实现HTTP/HTTPS,例如实现MQTT协议呢?)</p>
-<p>####自言自语<br>其中的StreamAllocation负责协调了Connection/Stream/Call三个对象之间的逻辑(因为涉及到connection, 所以这个类引入了Route). 因为在发送request最终会走到httpEngine的sendRequest方法,在这个方法里面会根据不同的状态执行不同的生成response的操作,而正常情况下会走获取服务器的response分支,而此分支的重点就是在connect()函数,它返回的是一个HttpStream对象.</p>
-<p>connect的函数实现是转交给了StreamAllocation的newStream()函数, 在newStream中最先做的是初始化一个RealConnection对象出来, 而剩余的工作就是判断http的版本,是初始化2.0版本的HttpStream对象还是以下版本的HttpStream对象。 有一个疑问是Stream对象到底是什么的抽象。我一直理解的是像FileInputStream对象一样是一个数据流的抽象,也就是说只应该关心数据(2进制)的读取or写入的逻辑才对, 而这个httpStream同时囊括了写入和读取的操作以及<code>StreamAllocation对象的实例是通过new StreamAllocation(client.connectionPool(), createAddress(client, request));</code> 来初始化的,这个request是最初状态的request. </p>
-<p>总结一下同步请求request的流程: (难点在于理解Sink 以及Stream的一个抽象, stream实际上是一个利用了OkIO对socket处理封装而成)<br>client.newCall(syncRequest).execute(), 首先是获取到一个RealCall的对象,是对发送请求行为的一个抽象, 接着从execute()作为入口, 创建出一个InterceptorChain对象,负责整个的请求流程中的实质性工作, 然后就是启动这个责任链了,当然会先去判断此责任链上的interceptor的个数以及各自所负责的任务是啥,咱先默认没有interceptor,直接调用getResponse()来获取response, 首先要检查我们发送出去的request是否携带了body体,如果不为空的话我们需要重新复制一份request出来(包括重新设置header的一些属性), 然后就是初始化一份httpEngine对象出来,此引擎对象是真正处理http事务的master. 紧接着就是进入一个while(true)循环, 第一步就是通过engine向服务器发送request, engine内部的发送request的逻辑为: 0. 将用户发出的request格式化成机器读的request 同时还设置了一些默认的header属性以及cookies, 1. 从client获取一下负责缓存的对象, 看看这个request有没有之前缓存下来的response 如果有的话就好说了,将其作为一个候选返回对象(并非一定可用,如果在可用时间内则可以作为返回对象否则还是需要刷新,涉及一个有效期检查的操作), 接着还需要判断网络环境、是否开启缓存设置来进一步筛选候选返回对象, 2. 常规的连接服务器来获取response.</p>
-<p>而负责跟服务器建立连接的逻辑放到了connect()函数内部，返回的是一个httpStream对象。在connect内部中实际上就是通过streamAllocation初始化出一个httpStream对象. 紧接着就是把这个stream对象和HttpEngine绑定在一块, 然后检查一下body体的大小, 超过2g不给发送。 最终利用httpStream的writeRequestHeaders方法把request的header发送给服务器. (个人疑惑的是Sink这个类是什么的一个抽象, 类似一个socket?)<br>在完成了上述的send操作, 紧接着就是读取response操作了, 如果服务器尚未准备好内容返回给请求方则会进入到catch 内部, 进而break掉当前的操作重新进入循环体, 直到服务器返回了response, 可见这个是一个阻塞操作, 不应该丢在主线程内去执行。<br>从服务器读取response操作有一个奇怪的地方, 会判断缓冲区的requestBody是否为空不为空的话发送给server? 为啥在getResponse的时候才发送body体内容呢? </p>
-<p>如何记录一个request的请求cost掉的时间? 在send的时候httpStream会纪录请求时间, readResponse会记录finishRequest的时间,这个时间差就是判断是否连接超时的一个依据。</p>
-<p>在读取并返回response的时候, 还是对httpStream的操作, 通过OkIO库对字节流的格式化生成一个network读的response, 后续的工作肯定就是对机器读的response格式化成用户友好型的response了,例如格式化response的header 的cookies, 如果有缓存的话直接用缓存的response没有缓存才用network的response来响应请求。</p>
-<p>以上是最简单情况的同步request, 那如果是有interceptor的话, 又会是什么样的流程呢?<br>Interceptor其实就是对网络请求的一个封装而已。上述的都提到过了, 而interceptor 只不过是提供给开发者一个更为灵活的可自定义的处理方式来取代上述默认的处理request-&gt;response的逻辑。</p>
-<p>####异步请求<br>dispacher: 是异步的核心类<br>持有一个ExecutorService,  三个队列(正在运行中异步call队列,正在运行中同步call队列,准备运行异步call队列)。把callback的引用封装成一个AsyncCall对象压到准备运行异步call队列中去,由executor来调度线程来启动call的execute()函数, 在此函数内部, 依旧是通过上述的getResponseWithInterceptorChain()方式获取到response结果(子线程中同步获得), 如果在执行期间调用了cancel那么将会回调callback引用的onFailer()函数, 否则的话就是回调onResponse()函数.流程也比较简单。 主要是理解executor是如何调度线程从队列中获取Call来执行这个过程要明白.</p>
-<p>####Connection为啥要抽象出一个类出来?<br>请求同一个地址的request可以共享同一个连接。如何理清socket与connection之间的逻辑…</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/04/okhttp-源码/" data-id="cj0xk72py000sfybyy6rteows" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
   
     <article id="post-happend-before及instruction-reorder" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -135,56 +86,10 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/09/happend-before及instruction-reorder/" data-id="cj0xk72ph000kfyby1v6vtdh4" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/01/09/happend-before及instruction-reorder/" data-id="cj0xlm33z000i9wbyyv161iwm" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java并发/">Java并发</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-关于DCL的笔记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/01/09/关于DCL的笔记/" class="article-date">
-  <time datetime="2017-01-09T08:04:37.000Z" itemprop="datePublished">2017-01-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/09/关于DCL的笔记/">关于DCL的笔记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>装逼用的是说DCL ,其实就是double check lock,如下代码:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton mInstance = <span class="keyword">null</span>;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">if</span>(mInstance == <span class="keyword">null</span>)&#123;</div><div class="line">			<span class="keyword">synchronized</span> (Singletom.class)&#123;</div><div class="line">				<span class="keyword">if</span>(mInstance == <span class="keyword">null</span>)&#123;</div><div class="line">					mInstance = <span class="keyword">new</span> Singleton();</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> mInstance;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>以上就是为了解决并发环境下获取单例实例的一个写法, 第一个判空是为了避免不必要的同步代码操作，第二个判空则是为了保证只执行一次实例操作。<br>当执行到了 <code>mInstance = new Singleton();</code> 也就是实例化一个类对象的时候，粗略的看来是完成了三个操作:(可参考 <a href="https://zhangxiaang.github.io/2016/11/07/%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%81%87%E5%88%B0new%E6%8C%87%E4%BB%A4%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88/">虚拟机遇到new时内存分配</a>)</p>
-<pre><code>* 为类实例分配内存;
-* 调用类默认构造函数;
-* 将分配好了的内存空间地址指针指向类实例(此时的mInstance == null就不成立了)
-</code></pre><p>(由此可得,类对象是否成功的实例化的依据是类引用指向了内存指定的地址而不是调用了构造函数)<br>由于在JDK1.5之前的JMM(java memory model)中规定,第二条和第三条的执行顺序不可定,如果线程1是1,2,3的顺序执行实例化操作,在任何一个步骤中有外来线程调用getInstance()都不会有问题的;但是如果线程1是1,3,2的顺序来执行实例化操作的话,外来线程调用到了getInstance()函数,此时的构造函数并没有调用到而只是分配到了内存空间,此时的外来线程如果获取到instance从而去执行某个类函数的话就会因尚未执行构造函数导致异常的发生.<br>解决方法就是给mInstance添加volatile修饰,这样可以保证读取的instance都是从主内存中获取的，保证了读的一致性。</p>
-<p>当然咯,DCL不是最好的选择,用下面的就可以了.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> SingletonHolder.sInstance;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span></span>&#123;</div><div class="line">		<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton mInstance = <span class="keyword">new</span> Singleton();</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/09/关于DCL的笔记/" data-id="cj0xk72q6000vfyby6thi2m66" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
 
     </footer>
   </div>
@@ -228,10 +133,204 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/06/StringBuilder是复用好还是new好/" data-id="cj0xk72pc000efybyytz9mg91" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2017/01/06/StringBuilder是复用好还是new好/" data-id="cj0xlm33m00099wbyy58n9fdz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Code/">Code</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-虚拟机遇到new指令发生了什么" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="article-date">
+  <time datetime="2016-11-07T06:23:41.000Z" itemprop="datePublished">2016-11-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/JVM/">JVM</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>从代码 <code>Clazz instance = new Clazz;</code> 编译成class中的new指令,<br>虚拟机在遇到这个new的指令的时候,具体会去做什么呢?<br>大概分为了如下几个大的步骤:</p>
+<pre><code>* 检验
+* 为对象分配内存
+* 考虑线程安全问题
+</code></pre><p>而每一个大的步骤下还有很多细节步骤:</p>
+        
+          <p class="article-more-link">
+            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="cj0xlm34o00179wbyexetcz33" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Shell主要的命令笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/07/Shell主要的命令笔记/" class="article-date">
+  <time datetime="2016-11-07T02:05:09.000Z" itemprop="datePublished">2016-11-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Bash/">Bash</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/07/Shell主要的命令笔记/">Shell主要的命令笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <a id="more"></a>
+<ul>
+<li><p>cat:</p>
+<ul>
+<li>原始用法: cat file1 file2  输出为两个文件的内容的一个合成结果</li>
+</ul>
+<ol>
+<li>接受来自标准输出作为输入流: echo ‘hello i am standard output stream | cat - test1.txt’ 就是把echo出来的内容和test1.txt内容拼接</li>
+<li>看看如何用cat压缩连续的空白行:cat -s file  (-s就是把多个连续的空白行只留存一个下来)</li>
+<li>如果想要去掉所有的空白行 则需要添加一个tr命令: cat -s file | tr -s ‘\n’ 这样就可以去掉所有的空白行了。</li>
+<li>输出文件的时候如果想要看看行号在cat 后面添加一个-n即可。</li>
+</ol>
+</li>
+<li><p>rsync命令:<br>  主要用于一次性大量删除指定文件夹下的所有文件  具体用法:<br>  先建立一个空白文件夹 blank<br>  rsync –delete-before -d blank/  指定删除文件夹文件  即可一次性大量删除文件 同时保留文件夹  虽然也可以rm -R dir 但是还需要重新建立文件夹    </p>
+</li>
+<li><p>export命令:<br>  export是用来设置环境变量参数用的.诸如<em>$HOME</em>,<em>PATH</em>,<em>PDW</em>都是可以使用exprot来修改的.<br>  例如原来的$HOME =&gt; /home/qiansheng 修改为 /home/qiansheng/bin如下:<br>  export HOME=”$HOME/bin/“即可完成修改环境变量.</p>
+</li>
+<li><p>linux文件的简单操作</p>
+<ul>
+<li>cat命令一般用户显示 拼接 读取文件.实际能力不止于此.</li>
+<li>把一个echo 内容传输到指定的文件内=&gt; echo “hello” &gt; target.txt;如果想要在文件后面追加内容＝&gt; echo “world” &gt;&gt; target.txt。如果想要查看文件的内容 =&gt; cat target.txt</li>
+<li>当我们执行一个命令行的时候，结果太多在终端不好查看.可以直接把结果存放到指定的文件中去: ls &gt; target.txt</li>
+</ul>
+</li>
+<li><p>使用alias别名命令可以简化命令:</p>
+<ul>
+<li>例如在使用apt-get 来安装指定的包需要:sudo apt-get install;我想使用install来代替前者: alias install=”sudo apt-get install” 这样就可以使用install来安装包了。</li>
+<li>但是需要注意的是alias设置的别名只是暂时的，如果关闭了terminal在此开启，之前设置的alias就会失效。如果说想要持久话这个别名的话，需要把它添加到~/.bashrc里面去的.=&gt; echo “alias install=’sudo apt-get install’” &gt;&gt; ~/.bashrc</li>
+<li>每当一个新的 shell进程生成的时候,都会执行下~/.bashrc的命令。</li>
+</ul>
+</li>
+<li><p>尝试组合多个命令和工具一起输出；一个命令的输出可以作为另外一个命令的输入(需要使用到管道这个概念);</p>
+<ul>
+<li>注意 ‘|’ 这个符号，表示的是“管道”的概念,就是把前面一个命令的输出作为输入源传到下一个命令行里面去.</li>
+<li>比如说: ls | cat -n target.txt;=&gt;这个例子就是把ls命令的输出作为了输入数据输入到了target.txt文件中.并且显示行号.</li>
+</ul>
+</li>
+<li><p>find的一些其他的实用搜索技术</p>
+<ul>
+<li>根据文件访问/创建/变化时间来进行检索 =&gt; find . -type f -amin(访问时间)/-mmin(修改时间)/-cmin(变化时间) +7(超过七分钟) -print</li>
+<li>根据文件大小来进行检索的 =&gt; find . -type f -size +2k/-2k/2k</li>
+<li>删除匹配到的文件=&gt; find . -type f -name “*.java” -delete</li>
+</ul>
+</li>
+<li><p>某些命令只能接受命令行参数形式接受数据，而无法正常的通过stdin接受数据流,这样我们可以利用xargs命令，它可以把标准的 stdin 转换成特定的命令行参数.</p>
+<ul>
+<li>可以将多行输出文本作为单行输出: 假设target.txt是一个多行文本 =&gt; cat target.txt | xargs</li>
+<li>同样的 把一个单行文本转化成多行文本=&gt; cat target.txt | xargs -n 3</li>
+<li>处理标准stdin输出流称为一个规范的输入流=&gt; echo “123a123a123” | xargs -d a  结果就处理成为 123 123 123 .</li>
+<li>xargs命令就是把前面的命令的输出作为后面命令的输入</li>
+<li></li>
+</ul>
+</li>
+<li><p>精美的小工具tr的实用技巧(translate命令)</p>
+<ul>
+<li>tr只能接受标准输入流, =&gt; tr [options] set1 set2 从set1映射到set2去</li>
+<li>加密的简单哪应用  echo “123456” | tr ‘0-9’ ‘9876543210’ =&gt;输出876543  解密就是=&gt; echo “876543” | tr ‘0-9’ ‘9876543210’ =&gt; 123456.著名的ROT13加密算法就是基于字母表向右移位13对原文进行加密。</li>
+<li>删除输入流内的一些内容: echo “123adbe678” | tr -d ‘0-9’ =&gt;adbe.也就是只需要一个set就可以 相当于一个限定条件。 -d就是删除的options , 当然还有一个-c 它含义是取set的补集.-s也是很有用的一个options，可以指定字符进行压缩string.</li>
+</ul>
+<ol>
+<li>tr只能接受来自标准的输入流作为处理对象 不可以接受参数</li>
+<li>echo ‘sadjaASJHFKas’ | tr ‘A-Z’ ‘a-z’ 就是把echo输出全部转化成小写   也就是 前面的是需要转换的目标的正则表达式 后者则是目的表达式的正则表达式</li>
+<li>删除指定的字符: 通过参数-d 来指定要删除的对象。</li>
+<li>压缩指定的字符对象: 通过参数-s 来指定需要被压缩的对象.</li>
+</ol>
+</li>
+<li><p>自动大量生成模版测试文件 例如从0~100.txt:</p>
+<ol>
+<li>采用touch这个命令。它可以生成空白文件,</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">for name in &#123;0..100&#125;.txt</div><div class="line">do</div><div class="line">touch $name(即使这个name文件存在了 那么就是修改他的时间戳为最新时间)</div><div class="line">done</div></pre></td></tr></table></figure>
+<ul>
+<li><p>文件统计部分:</p>
+<ol>
+<li>wc=&gt;word count.</li>
+<li>wc -l(统计行数) -w(统计单词) -c(统计字符数)</li>
+</ol>
+</li>
+<li><p>使用ssh无密码登录</p>
+<ol>
+<li>实现原理: 基于公钥和私钥加密技术进行自动化认证。想要实现自动化认证，就必须要把客户端的公钥存放到服务器端的中的.ssh/authorized_keys文件中。</li>
+<li>客户端通过ssh-keygen来生成密钥，  ssh-keygen -t rsa 生成。生成了一个pb公钥和一个私钥。</li>
+<li>第一次给服务器添加客户端的公钥是需要密码的; ssh ssh_localhost “cat &gt;&gt; ~/.ssh/authorized_keys” &lt; ~/.ssh/id_rsa.pub 就可以实现服务器添加客户端公钥了。</li>
+</ol>
+</li>
+<li><p>进程管理的一些tips</p>
+<ol>
+<li>ps 查看详情加一个-f |||||   -e 是展示所有的进程信息  top  则是按照cpu占用情况来展示进程的信息</li>
+</ol>
+</li>
+<li><p>git的几个tips:</p>
+<ul>
+<li>在把修改内容放进了缓存区了的话,stash 然后做完了紧急事儿后需要恢复  那么只需要 git stash pop就可以了同时也删除掉了git stash list的stash缓存信息</li>
+<li>git push 一般默认的远程的origin默认仓库，所以push 的写法就是指定一个仓库 以及分支 所以格式如下: git push origin(默认仓库) master(默认分支)</li>
+<li>有时候pull的时候需要两个分支对应好  不能本地的分支跟远程分支不对应起来git branch –set-upstream dev origin/dev 这样就建立本地分支和远程分支的关联</li>
+<li>标签管理: 用的比较少呢。</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2016/11/07/Shell主要的命令笔记/" data-id="cj0xlm33o000a9wbysub41aie" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li></ul>
 
     </footer>
   </div>
@@ -244,7 +343,7 @@
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/">&laquo; zurück</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">weiter &raquo;</a>
+    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -253,7 +352,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -266,15 +365,15 @@
           </li>
         
           <li>
-            <a href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
-          </li>
-        
-          <li>
             <a href="/2017/02/21/I-O/">I/O</a>
           </li>
         
           <li>
             <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
           </li>
         
       </ul>

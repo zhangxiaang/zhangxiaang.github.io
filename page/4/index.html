@@ -48,7 +48,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -58,124 +58,6 @@
 </header>
       <div class="outer">
         <section id="main">
-  
-    <article id="post-Gradle中的文件操作" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/09/09/Gradle中的文件操作/" class="article-date">
-  <time datetime="2016-09-09T06:48:42.000Z" itemprop="datePublished">2016-09-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/09/09/Gradle中的文件操作/">Gradle中的文件操作</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <a id="more"></a>
-<p>File遍历</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//File traversal 闭包形式</span></div><div class="line">task copys(<span class="string">type:</span> Copy) &#123;</div><div class="line">    <span class="keyword">def</span> dir = <span class="keyword">new</span> File(<span class="string">'app/src/main'</span>)</div><div class="line">    dir.traverse(</div><div class="line">    		  <span class="comment">//过滤条件</span></div><div class="line"><span class="symbol">            nameFilter:</span> <span class="regexp">~/.*\.jar|.*\.java|.*\.c/</span></div><div class="line">    ) &#123; file -&gt;</div><div class="line">        println(file.getName())</div><div class="line">        from file.canonicalPath</div><div class="line">        <span class="comment">//筛选</span></div><div class="line">        include <span class="string">'*Activity.java'</span></div><div class="line">        into <span class="string">'app/libs'</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>除了使用闭包的形式来遍历指定文件夹外,还可以使用fileTree()来完成同样的操作:</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">task tree(<span class="string">type:</span> Copy) &#123;</div><div class="line">    <span class="keyword">def</span> backUp = fileTree(<span class="string">'app/build/intermediates/classes/debug'</span>) &#123;</div><div class="line">        <span class="comment">//筛选后的file全部注入到backUp形成一个集合</span></div><div class="line">        include <span class="string">'**/*.class'</span></div><div class="line">        exclude <span class="string">'**/R.class'</span></div><div class="line">    &#125;</div><div class="line">    println(backUp.getFiles().size())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>这样得到的就是filetree对象了,可以使用传统的for each来遍历其中的每一个file,值得一提的是,生成的fileTree依旧可以继续调用matching()来完成进一步的筛选，很有liquit的感觉哈。</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">backUp.matching &#123;</div><div class="line">   include &#123;<span class="string">'~/.*\\.jar|.*\\.java|.*\\.c/'</span>&#125;</div><div class="line">   exclude(<span class="string">'**/*.class'</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>值得一提的是:在java中我们经常获取一个collection想要打印出集合内的信息,然而在gradle中生成的fileTree对象本身是不具备集合的系列功能的，不过我们可以通过files()来实现把fileTree”转换成”具备collection特性的对象,files(backUp).files-&gt;即可获得到同时具备backup的内容又同时具备collection接口的对象了(Set<file>)</file></p>
-<p>###expand</p>
-<p>此方法可用作于模版文件拓展，常用在于配置文件的生成:<br>有配置文件如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">## Application configuration file#hostname: $&#123;databaseHostname&#125;appVersion: $&#123;version&#125;locale: en_usinitialConnections: 10transferThrottle: 5400queueTimeout: 30000buildNumber: $&#123;buildNumber&#125;buildDate: $&#123;date.format(&quot;yyyyMMdd&apos;T&apos;HHmmssZ&quot;)&#125;</div></pre></td></tr></table></figure>
-<p>其中携带$符号的参数都是会随着项目的发布动态改变的,我们可以编写一个如下的task</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">task autoGenConfig(<span class="string">type:</span> Copy)&#123;</div><div class="line">	from <span class="string">'sourceDir'</span><span class="comment">//模版配置文件的路径</span></div><div class="line">	include <span class="string">'templateConfig.properties'</span><span class="comment">//模板配置文件的文件名</span></div><div class="line">	into <span class="string">'build/config'</span></div><div class="line">	expand([</div><div class="line"><span class="symbol">		databaseHostname:</span> <span class="string">'aaron.db.info'</span>,</div><div class="line"><span class="symbol">		version:</span> <span class="number">1.5</span>,</div><div class="line"><span class="symbol">		buildNumber:</span> (<span class="keyword">int</span>)(Math.random()*<span class="number">1000</span>),</div><div class="line"><span class="symbol">		date:</span> <span class="keyword">new</span> Date()</div><div class="line">	])</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>只要运行上述的task，最终能生成如下的配置文件:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">## Application configuration file#hostname: aaron.db.infoappVersion: 1.5locale: en_usinitialConnections: 10transferThrottle: 5400queueTimeout: 30000buildNumber: 77buildDate 20120105T162959-0700</div></pre></td></tr></table></figure>
-<p>可见expand()函数对于项目版本升级的管理来说提供了很大的便利。</p>
-<p>###文本操作利器Filter</p>
-<p>相比于expand()函数提供对文本的轻量级的”置换”功能，filter()函数提供了更为强大的功能，遍历指定文本的每一行进行修改，例如需要为每一行文本添加行号的要求:</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">task addLineNum(<span class="string">type:</span> Copy)&#123;</div><div class="line">	<span class="keyword">int</span> num = <span class="number">0</span></div><div class="line">	into <span class="string">'targetDir'</span></div><div class="line">	from <span class="string">'sourceDir'</span></div><div class="line">	include <span class="string">'target.md'</span></div><div class="line">	rename &#123; it - <span class="string">'.md'</span> + <span class="string">'.java'</span> &#125;<span class="comment">//修改后的文件名后缀给覆盖掉</span></div><div class="line">	filter&#123; line-&gt;</div><div class="line">		num++</div><div class="line">		String.valueOf(num) + line</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>###class文件打包jar</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">task buildJar(<span class="string">type:</span> Jar, <span class="string">dependsOn:</span> [<span class="string">'build'</span>]) &#123; <span class="comment">//build后才有class文件</span></div><div class="line">    archiveName = <span class="string">'my-lib.jar'</span></div><div class="line">    from(<span class="string">'app/build/intermediates/classes/debug'</span>) <span class="comment">//class文件的路径</span></div><div class="line">    from(project.zipTree(<span class="string">"libs/xxx-x.x.x.jar"</span>))<span class="comment">//这个同样是把第三方jar文件作为source</span></div><div class="line">    destinationDir = file(<span class="string">'app/libs'</span>) <span class="comment">//destinationDir is file not string</span></div><div class="line"><span class="comment">//    destinationDir = 'app/build/libs'  // error</span></div><div class="line">	<span class="comment">//排除指定class</span></div><div class="line">    exclude(<span class="string">'com/cool/boy/ugrowthview/BuildConfig.class'</span>)</div><div class="line">    include(<span class="string">'com/cool/boy/ugrowthview/*.class'</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>对于gradle的文件系统来说有一个Lazy Files的概念,例如通过fileTree()的形式来获取一个FileRoot方便后续的遍历,正常的思路是只要调用了这个方法就立马对path里面的file进行收集从而形成一个immutable的list对象，而在Gradle中，却因为整个构建过程分为了三个阶段如果一个path下的文件是必须经历了Execution阶段后才能操作的话就麻烦了，所以引入了lazy file的概念，尤其是在操作.class文件的时候，必须要经历build结束后才能有class文件。所以在gradle中的文件集合中的实际内容只有在构建执行到某一个特别的时间点后才会被填充的。</p>
-<p>ps: 对于Gradle构建过程来说，分为了三个阶段:</p>
-<pre><code>* Initialization: 此阶段确定哪些项目会加入到构建队列中，并且为每一个项目创建一个Project对象出来.
-* Configuration: 根据提供的构建脚本生成对应的task对象，引入了configuration on demand的概念(选择性的生成task对象，对于多项目构建系统中减少编译脚本时间是蛮有用的,通过给项目解藕实现的)
-* Execution: 根据configuration生成的task来确定需要用到哪些task,然后去执行选中的task,具体被选中的task是根据执行command line时传入的参数来确认的。
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/09/Gradle中的文件操作/" data-id="cj0xk72oa0000fybya2dscvag" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-使用ThreadLocal-storage来避免lock带来的性能损耗问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" class="article-date">
-  <time datetime="2016-09-03T16:17:01.000Z" itemprop="datePublished">2016-09-04</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/jvm/">jvm</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/">使用ThreadLocal storage来避免lock带来的性能损耗问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <a id="more"></a>
-<p>在jvm的垃圾回收章节中有讲到一个问题，就是关于young-generation中对新生对象的内存分配的优化涉及到的两个技术点，一个是Bump-the-pointer,此技术追踪了当前young-generation区的edan区域最新分配内存的对象，此对象放置在edan区域的top位置，最容易被访问到,然后当再次需要分配内存给新的对象的时候,都会检测edan区剩余的内存空间是否足以分配给new出来的对象，如果空间足够的话那么新生成的对象再次取代上一个new出来的对象的top位置(应该是一个链表的结构).不够的话自然触发minor gc了。</p>
-<p>以上看起来很不错，但是前提是在单线程中很好用;万一是多线程环境呢?第一反应肯定是在alloc内存之前加锁呗…然而这样带来的问题就是性能低下，毕竟new那么频繁，对性能的影响肯定是极大的。</p>
-<p>所以对应的技术就是Thread-local allocation buffers，避免加锁也能实现内存的高效分配。</p>
-<p><a href="https://software.intel.com/en-us/articles/use-thread-local-storage-to-reduce-synchronization" target="_blank" rel="external">参考</a></p>
-<p>其中有一个example code如下:</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> count=<span class="number">0</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp parallel shared(count)</span></div><div class="line">&#123;</div><div class="line"> . . .</div><div class="line"> <span class="keyword">if</span> (event_happened) &#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp atomic</span></div><div class="line"> count++;</div><div class="line">&#125;</div><div class="line">. . .</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>这段代码必须要保证在多线程环境下对count的自加行为是同步发生的，所以解决的思路是:让每一个线程在自己的内存空间中对这个count进行自加，然后再统一sum各个线程中的count值，最终得到的value就是正确的结果。据此改善后的代码如下:</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> count=<span class="number">0</span>;</div><div class="line"><span class="keyword">int</span> tcount=<span class="number">0</span>;<span class="comment">//线程独立内存空间中的count值，其特点就是只能被当前线程内部的所有函数操作,但是其他的线程无法操作。</span></div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp threadprivate(tcount)</span></div><div class="line">omp_set_dynamic(<span class="number">0</span>);</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp parallel</span></div><div class="line">&#123;</div><div class="line">. . .</div><div class="line"> <span class="keyword">if</span> (event_happened) &#123;</div><div class="line"> tcount++;</div><div class="line"> &#125;</div><div class="line"> . . .</div><div class="line">&#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp parallel shared(count)</span></div><div class="line">&#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">pragma</span> omp atomic</span></div><div class="line"> count += tcount;<span class="comment">//最终的sum操作</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>那么实现一个thread-local storage的原理是怎样的呢?<br>通常的做法是建立一个全局表，这张表里记录着threadID-&gt;thread-data-addr,也就是这张表需要记录的就是每一个thread的id映射到各自的数据内存地址即可。</p>
-<p>具体实现,参考java层实现的thread-local,在此博文中有讲到,可供参考<a href="http://zhangxiaang.github.io/2015/12/02/ThreadLocal%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86/">ThreadLocal的工作原理</a></p>
-<p>—–update<br>threadID-&gt;thread-data是最早的设计，目前已经使用一个Values类来描述存储数据结构，实质上是一个Object[],并且是一个比较有意思的数组，体现在threadLocal对象作为key，独立变量参数作为value；可是这个数据结构不就是一个Obejct[]数组吗?哪来的key-&gt;value映射呢?(肯定需要一个map吧)，然而设计的是这个obj[]的偶数index存放的是threadlcoal对象而相邻的奇数index存放的就是对应的value.</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" data-id="cj0xk72pr000pfybyfmz66nxi" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
   
     <article id="post-新生代gc会去遍历老生代区查看被引用的对象吗?" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -212,7 +94,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" data-id="cj0xk72qa0010fybygozt2e8h" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" data-id="cj0xlm34f000v9wby6zit76s1" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
@@ -266,7 +148,99 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/07/08/Android-WebView开发tips/" data-id="cj0xk72ow0006fybypp4l7in5" class="article-share-link">Teilen</a>
+      <a data-url="http://zhangxiaang.github.io/2016/07/08/Android-WebView开发tips/" data-id="cj0xlm32v00029wbywqf06yuj" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-统计代码量" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/01/统计代码量/" class="article-date">
+  <time datetime="2016-03-01T11:42:35.000Z" itemprop="datePublished">2016-03-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Bash/">Bash</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/01/统计代码量/">统计Android项目java文件代码量</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>切到项目的java文件目录下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ find . <span class="string">"("</span> -name <span class="string">"*.java"</span> <span class="string">")"</span> -print | xargs wc <span class="_">-l</span></div></pre></td></tr></table></figure></p>
+<p>即可获取到java文件的代码量</p>
+<p>add</p>
+<p>批量修改指定文件夹下的匹配上的字符串</p>
+<p>find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2016/03/01/统计代码量/" data-id="cj0xlm34l00139wbyv5rz1f65" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-ThreadLocal的工作原理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/12/02/ThreadLocal的工作原理/" class="article-date">
+  <time datetime="2015-12-02T09:16:45.000Z" itemprop="datePublished">2015-12-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/12/02/ThreadLocal的工作原理/">ThreadLocal的工作原理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Q:为何说可以通过ThreadLocal实现在同一进程内维护同一数据在不同线程中各自的值并且互不干扰?</p>
+        
+          <p class="article-more-link">
+            <a href="/2015/12/02/ThreadLocal的工作原理/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2015/12/02/ThreadLocal的工作原理/" data-id="cj0xlm33v000e9wbyhb6uvllw" class="article-share-link">Share</a>
       
       
     </footer>
@@ -280,7 +254,7 @@
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/3/">&laquo; zurück</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/5/">weiter &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -289,7 +263,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -302,15 +276,15 @@
           </li>
         
           <li>
-            <a href="/2017/03/09/AndroidTV焦点移动-md/">AndroidTV焦点移动.md</a>
-          </li>
-        
-          <li>
             <a href="/2017/02/21/I-O/">I/O</a>
           </li>
         
           <li>
             <a href="/2017/02/04/okhttp-源码/">okhttp 源码</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/09/happend-before及instruction-reorder/">happend-before及instruction-reorder的笔记</a>
           </li>
         
       </ul>
