@@ -59,6 +59,53 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-StringBuilder是复用好还是new好" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/01/06/StringBuilder是复用好还是new好/" class="article-date">
+  <time datetime="2017-01-06T05:10:31.000Z" itemprop="datePublished">2017-01-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <a id="more"></a>
+<p>&emsp;&emsp;有时候遇到一些拼接字符串的需求,上一个字符串拼接完了下一个字符串需要再次用到StringBuilder了,此时到底是为了减少memory allocate去复用上一个StringBuilder好还是干脆直接新建一个StringBuilder好呢?</p>
+<p>例如有这么一个需求:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder b = <span class="keyword">new</span> StringBuilder();</div><div class="line"><span class="comment">//build up a string</span></div><div class="line">b.delete(<span class="number">0</span>, b.length());</div><div class="line"><span class="comment">//reuse it</span></div></pre></td></tr></table></figure>
+<p>这样在后期代码交接维护的时候会带来疑惑? 这个StringBuilder到底是来干嘛的? 与其话几行的注释去解释为何要这么做, 还不如写一个方法, 来改变这一个StringBuilder的名称(利用final保持引用不改变即可)从而避免遇到这样的问题 :</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> StringBuilder <span class="title">renameForReuse</span><span class="params">(StringBuilder sb)</span></span>&#123;</div><div class="line">	sb.delete(<span class="number">0</span>, sb.length());</div><div class="line">   	<span class="keyword">return</span> sb;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>于是乎, 上述的代码可以写成:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder b1 = <span class="keyword">new</span> StringBuilder();</div><div class="line"><span class="comment">//build up a string use b1</span></div><div class="line">StringBuilder b2 = renameForReuse(b1);</div><div class="line"><span class="comment">//reuse it and rename to b2</span></div></pre></td></tr></table></figure>
+<p>这样看起来就清爽多了,也不需要注释因为函数名称足够解释b2是干嘛的了 ;) </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/01/06/StringBuilder是复用好还是new好/" data-id="cj1ytj9wf00088wbyvd2ekl5d" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Code/">Code</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-虚拟机遇到new指令发生了什么" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/11/07/虚拟机遇到new指令发生了什么/" class="article-date">
@@ -98,7 +145,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="cj1q7kta5000z3jby33mb0o2k" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="cj1ytj9xk000z8wbyzlyfey8s" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
@@ -241,7 +288,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/11/07/Shell主要的命令笔记/" data-id="cj1q7kt9c00073jbydbcllgq7" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/11/07/Shell主要的命令笔记/" data-id="cj1ytj9wy000g8wby66vcmj55" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li></ul>
@@ -354,62 +401,9 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/10/10/一些疑问记录-待答-/" data-id="cj1q7kt9u000r3jby7atdeds8" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/10/10/一些疑问记录-待答-/" data-id="cj1ytj9x1000i8wbyfx81rxru" class="article-share-link">Partager</a>
       
       
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-json反-序列化的优劣势" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/09/22/json反-序列化的优劣势/" class="article-date">
-  <time datetime="2016-09-22T03:29:25.000Z" itemprop="datePublished">2016-09-22</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/序列化协议/">序列化协议</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/09/22/json反-序列化的优劣势/">json反/序列化的优劣势</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <a id="more"></a>
-<p>Json作为业内(web)公认的序列化协议</p>
-<ul>
-<li>对于跨平台跨语言的问题解决的很好</li>
-<li>可调试性好，在线解析工具支持的比较好。但是作为代价的就是保密性不佳</li>
-<li>数据量相比来讲小很多,在传输和解析(同样也depends on解析的代码)的速度上算得上是最优选择</li>
-<li>可拓展性好，对于业务频繁的更换，也能随时切换自如</li>
-<li>json到obj的转化实际上是程序员通过标准化的代码来取代了序列化协议中的IDL文件，而这个文件的作用就是描述每一个属性的信息；然而json的数据就是对应着一个obj的各个属性，所以就省去了IDL compiler的角色了。</li>
-<li>不过另外一个问题就是在某些语言中解析Json转化成对应语言中的某种结构的方式有所不同，例如在Java中，解析的方式是通过reflection来实现的,众所皆知反射带来的性能缺失问题，尤其当数据量比较大的时候而且对与数据的实时性要求较高例如ms级别的请求,Json来作为序列化协议就无能为力了,这个时候就可以参考Thrift项目了满足当前大数据量、分布式、跨语言、跨平台数据通讯的需求。</li>
-</ul>
-<p>flat string -&gt; java model class(POJO):<br>语法解析 : flat str –&gt; jsonObj(JSONTokener是核心类处理语法解析逻辑)<br>反射遍历变量 : jsonObj –&gt; POJO(通过传入的class反射遍历变量, 把JSONObject的value一个个填坑到pojo里面)</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/22/json反-序列化的优劣势/" data-id="cj1q7kt9h000b3jby4979jh8j" class="article-share-link">Partager</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/序列化协议/">序列化协议</a></li></ul>
-
     </footer>
   </div>
   
@@ -435,6 +429,10 @@
       <ul>
         
           <li>
+            <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
+          </li>
+        
+          <li>
             <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
           </li>
         
@@ -448,10 +446,6 @@
         
           <li>
             <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
-          </li>
-        
-          <li>
-            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
           </li>
         
       </ul>

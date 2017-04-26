@@ -59,6 +59,58 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Android-WebView开发tips" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/08/Android-WebView开发tips/" class="article-date">
+  <time datetime="2016-07-08T13:04:14.000Z" itemprop="datePublished">2016-07-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/08/Android-WebView开发tips/">Android WebView开发tips</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li><p>webView 优化的tips(native端):</p>
+<ul>
+<li>修改加载资源顺序</li>
+<li>webView缓存优化(缓存累积占用手机内存问题)</li>
+<li>开启硬件加速设置开关(提升页面绘制效率，测试html中video/canvas标签)</li>
+<li>webView内存泄露的问题</li>
+<li>Js与native端的两种交互方式实现的原理解析</li>
+<li>打包时混淆代码需要注意的地方</li>
+</ul>
+</li>
+</ul>
+        
+          <p class="article-more-link">
+            <a href="/2016/07/08/Android-WebView开发tips/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2016/07/08/Android-WebView开发tips/" data-id="cj1ytj9vo00008wbykfmp9coa" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-统计代码量" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/03/01/统计代码量/" class="article-date">
@@ -94,7 +146,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/03/01/统计代码量/" data-id="cj1q7kta600113jbyvz7wmqyz" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/03/01/统计代码量/" data-id="cj1ytj9xo00138wbyfxo22qqr" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
@@ -141,7 +193,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/12/02/ThreadLocal的工作原理/" data-id="cj1q7kt9k000f3jbyfcagpg73" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2015/12/02/ThreadLocal的工作原理/" data-id="cj1ytj9wg000b8wbyjm2or4c8" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -190,57 +242,9 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/11/16/关于broadcastReceiver与service交互时调用peekService的疑问/" data-id="cj1q7kt9n000i3jbyptwlywmf" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2015/11/16/关于broadcastReceiver与service交互时调用peekService的疑问/" data-id="cj1ytj9x5000m8wbyxn7taxfk" class="article-share-link">Partager</a>
       
       
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-处理Runtime-Changed的官方建议" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/08/02/处理Runtime-Changed的官方建议/" class="article-date">
-  <time datetime="2015-08-02T05:34:02.000Z" itemprop="datePublished">2015-08-02</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Android/">Android</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/08/02/处理Runtime-Changed的官方建议/">处理Runtime Changed的官方建议</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>一般情况下我们应用的配置发生了改变的话，activity会被destory掉(目的是为了让应用去适应新的配置环境)，然后重开启一个activty,这就涉及到数据存储的问题了。</p>
-<p>一般情况下: activity在发生异常的时候，会先执行onSaveInstanceState()的，把我们的数据存进去，然后在<em>onCreate(Bundle savedInstanceState)</em>或者<em>onRestoreInstanceState(Bundle savedInstanceState)</em>的时候从bundle取出来就可以了,但<em>onSaveInstanceState()</em>只是适合小数据量的情况。如果数据量很大的话，比如说一个复杂的listView里面的item数据(比如说包含了bitmap)，是否也要花一大部分代码去存储数据状态呢?显然是不对的，这样太占用内存了。<br><strong>解决方案有两个</strong><br>
-        
-          <p class="article-more-link">
-            <a href="/2015/08/02/处理Runtime-Changed的官方建议/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/08/02/处理Runtime-Changed的官方建议/" data-id="cj1q7kta2000v3jbyjq9q2rle" class="article-share-link">Partager</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li></ul>
-
     </footer>
   </div>
   
@@ -266,6 +270,10 @@
       <ul>
         
           <li>
+            <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
+          </li>
+        
+          <li>
             <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
           </li>
         
@@ -279,10 +287,6 @@
         
           <li>
             <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
-          </li>
-        
-          <li>
-            <a href="/2016/11/07/虚拟机遇到new指令发生了什么/">虚拟机遇到new指令,发生了什么</a>
           </li>
         
       </ul>
