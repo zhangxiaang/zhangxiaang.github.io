@@ -59,6 +59,56 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Head-First-Java-Future" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/10/Head-First-Java-Future/" class="article-date">
+  <time datetime="2017-05-10T07:07:55.000Z" itemprop="datePublished">2017-05-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>介绍:</p>
+<p>Future是JDK7中并发包里新增的一个接口, 持有的范型<v> 即为调用Future的get()返回的值类型. </v></p>
+<p>Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置一个timeout, 超时则自动停止阻塞状态; 并且提供了cancel()方法来取消当前任务. </p>
+<p>一个比较常见的场景: 通过ExecutorService执行了一个异步任务并返回一个future对象, 当前线程接着去做一些其他的事务, 而此任务并没有设置相应的任务回调, 所以即使完成了任务也没办法通知到当前线程”任务结束”. 所以在当前线程内需要用到任务结果的时候, 可以通过future.get()来获取结果, 当然在get()的时候任务可能仍在执行导致当前线程进入阻塞状态等待任务结束或者抛出异常, 所以可能会产生InterruptedException/ExecutionException 异常。</p>
+<p>JDK自带的实现:FutureTask</p>
+<p>Guava的相关实现:ListenableFuture</p>
+<p>FutureTask 就是一个实现了RunnableFuture接口的类, 被线程池调度出的workThread执行run()函数, 而实际的耗时任务被放进Callable接口里的call(). workThread 在进入到run()内部的时候会通过callable的call()去真正调起耗时任务, 并且该workThread会一直阻塞到耗时计算完成为止(or exception). 所以说配合线程池来实现并发操作真的是太perfect了.</p>
+<p>ListenableFuture 在Guava的的此接口简介中, 强烈建议使用ListenableFuture来替代JDK的Future接口, 那么此接口的意义是什么呢?相比较JDK的Future接口, 拓展了什么呢?</p>
+<p>传统的Future接口在计算工作完成后, 调用方是不能及时的知道此计算工作的完成时刻, 也就无法确保在一个正确的时间点去拿到执行结果的, 唯一的方式是通过get()去读取这个result, 在get()调用的时候任务仍可能处于执行状态, 那么调用方就可能进入阻塞状态直到计算任务的结束.</p>
+<p>对于这样的问题, ListenableFuture提供了一个注册listener机制, 在任务结束结束的时刻即可通过此listener来回馈计算结果. 相比较于Future, ListenableFuture新增的函数为:</p>
+<p>addListener(Runnable listener, Executor executor);</p>
+<p>其中的参数listener对象就是作为一个回调传入到task的内部, 在workThread开始执行了run()方法并且拿到结果后, 就立马通过listener.run()函数来通知调用方结果可用, 不再需要调用方通过get()去拿一个”未知状态”的result。这样使得并发操作更为简便以及准确了.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2io4lpu0002bxbysz4uawnh" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future-并发/">Future/并发</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Looper-loop-是否导致主线程卡死问题探讨" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" class="article-date">
@@ -97,7 +147,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj1ytj9wb00078wbyeceld774" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj2io4lq50006bxbyevbyg78e" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -183,7 +233,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj1ytj9w900068wbyj6w6ygwj" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj2io4lqf000cbxbyhkseb4rh" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -247,53 +297,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj1ytj9xj000x8wbytrbge7pu" class="article-share-link">Partager</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-I-O" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/02/21/I-O/" class="article-date">
-  <time datetime="2017-02-21T07:58:17.000Z" itemprop="datePublished">2017-02-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/02/21/I-O/">I/O</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。</p>
-<p>输出流负责写入数据，输入流负责负责读取数据。<br>相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可<br>能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而是暂存于缓冲区中。<br>在处理输入流的时候一般都是一个一个字节的读取输入流内的数据，不过也可以通过一段缓冲区来指定读取的字节数:</p>
-<pre><code>byte[] buffer = new buffer[1024];
-while(inputStream.read(buffer) != -1){
-    outputStream.write(buffer);
-}
-</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?<br>或者把输入输出流以buffer作为基准，输入流需要把文件的内容输出到这一块buffer来，所以对应的是 read 方法，对应的输出流则是把buffer的内容输入到文件内所以对应的方法是write。<br>数据流有一块区域称之为缓冲区，上面说了缓冲区是干嘛的，每次输出数据的时候数据最先到达的是缓冲区而不是直接传到磁盘中去，只有当缓冲区满了或者调用了关闭流的函数才能把数据传输到<br>磁盘存储中，所以说调用close一方面是为了释放资源另一方面也是为了把最后一次输入到缓冲区的数据强制刷到磁盘中，否则的话无法保证数据的完整性。</p>
-<p>利用缓冲机制来提升读取数据流的效率:<br>实际上每次调用read都会从OS请求分发一个字节，一般的做法就是一个while循环取出所有数据这样未免效率略低，所以可以采用缓冲机制，一次性从os请求一个数据块放在数据流的缓冲区，<br>每次读取字节跳过os直接从缓冲区读取字节这样减少与os的交互从而提升效率。而自带缓冲机制的则是BufferedInputStream, 所以需要把数据源包装一下从而获得可用缓冲区。</p>
-<p>nio是基于数据块的普通io是基于数据流的，前者把最耗时的io操作(也就是把数据流填充到缓冲区或者将缓冲区的数据流提取出来)都转移给了操作系统去完成，以前都是基于一个一个字节来传数据<br>此时可以以一个缓冲区的容积(也就是所谓的数据块)作为基本单位来传输数据。<br>普通io操作数据流有个api是 read(byte[])/write(byte[]) 看起来像是一次消费了byte数组长的数据(可以看作数据块)，然而实际上实现的方式是遍历这个字节数组，真正去消费数据流还是一个<br>write(int oneByte)/read(int oneByte),所以说面向流的io是很慢的。不过一个字节一个字节的传输有一个好处就是可以精准的过滤每一个字节，可以为一个数据流创建多个过滤器，例如如下代码:<br><strong>new BufferedInputStream(new FileInputStream(“textByte.txt”))</strong></p>
-<p><strong>序列化的问题</strong><br>如果一个对象a持有了另外一个对象b的引用，那么此时如果想要序列化掉a，需要把对象b的引用地址序列化到对象a中去吗?<br>当然是不行的，即使把对象b的引用放入了对象a中那么再次加载对象a无法保证引用指向的地址依旧对应的是对象b，它的对应的引用地址可能已经被回收而新生成的对象b地址可能在其他的地方。<br>具体的做法就是为对象引用建立一个model并且赋予它一个序列号，比如说对象a饮用到了对象b，首先要做的就是把对象b的值存储起来，然后跟对象a建立起关系(也就是说对象a引用到了对象b，<br>也就是objB-&gt;modelBNum)这样的话在反序列化的时候就可以把对象a完整的取出来而对象b也能够重新实例化出来并且恢复序列化前跟对象a之间的联系。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj1ytj9w700048wby8itul0op" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj2io4lqm000jbxbysfn5zz24" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -321,6 +325,10 @@ while(inputStream.read(buffer) != -1){
       <ul>
         
           <li>
+            <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
+          </li>
+        
+          <li>
             <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
           </li>
         
@@ -334,10 +342,6 @@ while(inputStream.read(buffer) != -1){
         
           <li>
             <a href="/2017/02/21/I-O/">I/O</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
           </li>
         
       </ul>

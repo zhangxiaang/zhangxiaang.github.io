@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Head First Java Future | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="介绍:
+Future是JDK7中并发包里新增的一个接口, 持有的范型 即为调用Future的get()返回的值类型. 
+Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Head First Java Future">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="介绍:
+Future是JDK7中并发包里新增的一个接口, 持有的范型 即为调用Future的get()返回的值类型. 
+Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置">
+<meta property="og:updated_time" content="2017-05-10T07:32:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Head First Java Future">
+<meta name="twitter:description" content="介绍:
+Future是JDK7中并发包里新增的一个接口, 持有的范型 即为调用Future的get()返回的值类型. 
+Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Head-First-Java-Future" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/10/Head-First-Java-Future/" class="article-date">
+  <time datetime="2017-05-10T07:07:55.000Z" itemprop="datePublished">2017-05-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Head First Java Future
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>介绍:</p>
+<p>Future是JDK7中并发包里新增的一个接口, 持有的范型<v> 即为调用Future的get()返回的值类型. </v></p>
+<p>Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置一个timeout, 超时则自动停止阻塞状态; 并且提供了cancel()方法来取消当前任务. </p>
+<p>一个比较常见的场景: 通过ExecutorService执行了一个异步任务并返回一个future对象, 当前线程接着去做一些其他的事务, 而此任务并没有设置相应的任务回调, 所以即使完成了任务也没办法通知到当前线程”任务结束”. 所以在当前线程内需要用到任务结果的时候, 可以通过future.get()来获取结果, 当然在get()的时候任务可能仍在执行导致当前线程进入阻塞状态等待任务结束或者抛出异常, 所以可能会产生InterruptedException/ExecutionException 异常。</p>
+<p>JDK自带的实现:FutureTask</p>
+<p>Guava的相关实现:ListenableFuture</p>
+<p>FutureTask 就是一个实现了RunnableFuture接口的类, 被线程池调度出的workThread执行run()函数, 而实际的耗时任务被放进Callable接口里的call(). workThread 在进入到run()内部的时候会通过callable的call()去真正调起耗时任务, 并且该workThread会一直阻塞到耗时计算完成为止(or exception). 所以说配合线程池来实现并发操作真的是太perfect了.</p>
+<p>ListenableFuture 在Guava的的此接口简介中, 强烈建议使用ListenableFuture来替代JDK的Future接口, 那么此接口的意义是什么呢?相比较JDK的Future接口, 拓展了什么呢?</p>
+<p>传统的Future接口在计算工作完成后, 调用方是不能及时的知道此计算工作的完成时刻, 也就无法确保在一个正确的时间点去拿到执行结果的, 唯一的方式是通过get()去读取这个result, 在get()调用的时候任务仍可能处于执行状态, 那么调用方就可能进入阻塞状态直到计算任务的结束.</p>
+<p>对于这样的问题, ListenableFuture提供了一个注册listener机制, 在任务结束结束的时刻即可通过此listener来回馈计算结果. 相比较于Future, ListenableFuture新增的函数为:</p>
+<p>addListener(Runnable listener, Executor executor);</p>
+<p>其中的参数listener对象就是作为一个回调传入到task的内部, 在workThread开始执行了run()方法并且拿到结果后, 就立马通过listener.run()函数来通知调用方结果可用, 不再需要调用方通过get()去拿一个”未知状态”的result。这样使得并发操作更为简便以及准确了.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2io4lpu0002bxbysz4uawnh" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future-并发/">Future/并发</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ancien</strong>
+      <div class="article-nav-title">Looper.loop()是否导致主线程卡死问题探讨</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Articles récents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/21/I-O/">I/O</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

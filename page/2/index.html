@@ -59,6 +59,52 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-I-O" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/02/21/I-O/" class="article-date">
+  <time datetime="2017-02-21T07:58:17.000Z" itemprop="datePublished">2017-02-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/21/I-O/">I/O</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>java中的file对象实际上只是一个抽象的概念，FileDescriptor才是真正意义上指代file的对象。</p>
+<p>输出流负责写入数据，输入流负责负责读取数据。<br>相比于输入输出流，缓冲流有一块区域叫做缓冲区，缓冲区用于数据流的缓存，如果向缓冲流中读取数据，首先是从缓冲区中读取数据，如果此时的缓冲区为空，系统会自动的从磁盘中读取数据，尽可<br>能的填充满缓冲区，此时从设备中读取的数据并不会直接发送给外部设备而是暂存于缓冲区中。<br>在处理输入流的时候一般都是一个一个字节的读取输入流内的数据，不过也可以通过一段缓冲区来指定读取的字节数:</p>
+<pre><code>byte[] buffer = new buffer[1024];
+while(inputStream.read(buffer) != -1){
+    outputStream.write(buffer);
+}
+</code></pre><p>可以把文件想象出一个用于装字节的容器，FileInputStream 想像成一个水管用于抽取文件中的字节s，对应的FileOutputStream就是一个专门用于向容器中注入字节s<br>哎，其实主要是根据命名去理解stream太蛋疼了,文件输出流不应该是用于抽取文件字节 文件输入流不应该是用于注入字节的吗?咋刚好相反呢 ?<br>或者把输入输出流以buffer作为基准，输入流需要把文件的内容输出到这一块buffer来，所以对应的是 read 方法，对应的输出流则是把buffer的内容输入到文件内所以对应的方法是write。<br>数据流有一块区域称之为缓冲区，上面说了缓冲区是干嘛的，每次输出数据的时候数据最先到达的是缓冲区而不是直接传到磁盘中去，只有当缓冲区满了或者调用了关闭流的函数才能把数据传输到<br>磁盘存储中，所以说调用close一方面是为了释放资源另一方面也是为了把最后一次输入到缓冲区的数据强制刷到磁盘中，否则的话无法保证数据的完整性。</p>
+<p>利用缓冲机制来提升读取数据流的效率:<br>实际上每次调用read都会从OS请求分发一个字节，一般的做法就是一个while循环取出所有数据这样未免效率略低，所以可以采用缓冲机制，一次性从os请求一个数据块放在数据流的缓冲区，<br>每次读取字节跳过os直接从缓冲区读取字节这样减少与os的交互从而提升效率。而自带缓冲机制的则是BufferedInputStream, 所以需要把数据源包装一下从而获得可用缓冲区。</p>
+<p>nio是基于数据块的普通io是基于数据流的，前者把最耗时的io操作(也就是把数据流填充到缓冲区或者将缓冲区的数据流提取出来)都转移给了操作系统去完成，以前都是基于一个一个字节来传数据<br>此时可以以一个缓冲区的容积(也就是所谓的数据块)作为基本单位来传输数据。<br>普通io操作数据流有个api是 read(byte[])/write(byte[]) 看起来像是一次消费了byte数组长的数据(可以看作数据块)，然而实际上实现的方式是遍历这个字节数组，真正去消费数据流还是一个<br>write(int oneByte)/read(int oneByte),所以说面向流的io是很慢的。不过一个字节一个字节的传输有一个好处就是可以精准的过滤每一个字节，可以为一个数据流创建多个过滤器，例如如下代码:<br><strong>new BufferedInputStream(new FileInputStream(“textByte.txt”))</strong></p>
+<p><strong>序列化的问题</strong><br>如果一个对象a持有了另外一个对象b的引用，那么此时如果想要序列化掉a，需要把对象b的引用地址序列化到对象a中去吗?<br>当然是不行的，即使把对象b的引用放入了对象a中那么再次加载对象a无法保证引用指向的地址依旧对应的是对象b，它的对应的引用地址可能已经被回收而新生成的对象b地址可能在其他的地方。<br>具体的做法就是为对象引用建立一个model并且赋予它一个序列号，比如说对象a饮用到了对象b，首先要做的就是把对象b的值存储起来，然后跟对象a建立起关系(也就是说对象a引用到了对象b，<br>也就是objB-&gt;modelBNum)这样的话在反序列化的时候就可以把对象a完整的取出来而对象b也能够重新实例化出来并且恢复序列化前跟对象a之间的联系。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj2io4lqb0008bxbynsvdtq70" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-StringBuilder是复用好还是new好" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/01/06/StringBuilder是复用好还是new好/" class="article-date">
@@ -94,7 +140,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/06/StringBuilder是复用好还是new好/" data-id="cj1ytj9wf00088wbyvd2ekl5d" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/01/06/StringBuilder是复用好还是new好/" data-id="cj2io4lqd000bbxbykzxajfnd" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Code/">Code</a></li></ul>
@@ -145,7 +191,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="cj1ytj9xk000z8wbyzlyfey8s" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/11/07/虚拟机遇到new指令发生了什么/" data-id="cj2io4lr60014bxbyisg2nonp" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
@@ -288,122 +334,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/11/07/Shell主要的命令笔记/" data-id="cj1ytj9wy000g8wby66vcmj55" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/11/07/Shell主要的命令笔记/" data-id="cj2io4lqh000ebxbynct1cmnj" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bash/">Bash</a></li></ul>
 
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-一些疑问记录-待答-" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/10/10/一些疑问记录-待答-/" class="article-date">
-  <time datetime="2016-10-10T02:01:04.000Z" itemprop="datePublished">2016-10-10</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <a id="more"></a>
-<ul>
-<li>在开发中遇到弹窗，如何高效的处理弹窗问题?(既能够避免使用Activity也能够使得dialog拥有Activity一样的机制? 实质上就是window的管理问题)</li>
-<li>DecorView和ViewRoot(Impl)两者之间是啥关系来着?</li>
-<li>Android虚拟机和Zygote进程到底是什么关系来着? 是虚拟机运行在Zygote进程中还是Zygote进程在虚拟机中运行?stackoverflow: what is the relationship between vm and zygote process?<ul>
-<li>当zygote发生了一次fork(),也就是相当于创建出一个新的vm    </li>
-</ul>
-</li>
-<li>Java层在创建一个Looper的时候同时初始化了一个MessageQueue出来,而MQ的初始化代码是一段native层的代码:仔细看nativeMessageQueueInit发现，在native层实际上也初始化了一个new Looper(false);那么这个native层的Looper对象和Java层的Looper对象有什么联系呢?</li>
-<li><p>Java代码时如何跟native代码进行交互的?</p>
-<ul>
-<li>c里面的指针可以传递给java层,java层每次调用相关native代码把这个ptr作为参数传递进去就可以告知native层具体去操作哪一个对象了.</li>
-</ul>
-</li>
-<li><p>adb中 /system/bin/app_process*里面的app_process64(32)是干啥的?</p>
-<ul>
-<li>这个app_process也就是zygote processde代表，app_process化名为App_Main.cpp文件 存在于cmds/app_process下 代码量还比较少    </li>
-<li>注意在app_process的 main()函数里面读取传入的参数，根据参数来执行类似的命令<em>runtime.start(“com.android.internal.os.ZygoteInit”, args);</em> 也就是说启动了zygote进程的main()函数.可以把app_process看作是一个壳，负载了zygote/servicemanager的启动。</li>
-<li>这个runtime对象的初始化过程中就通过startVm()来启动了虚拟机;接着这个zygoteInit程序就运行在启动了的虚拟机上了.</li>
-<li><p>android的系统服务 SystemServer启动入口:</p>
-<ul>
-<li>zygoteInit.startSystemServer()就是入口; 在这个函数内部主要做的工作就是fork一个子进程出来让子进程去继续完成剩下的未启动的系统服务列表;如果这些系统级别的服务都启动好了的话就可以进入launcher界面了.详情查看handleSystemServerProcess函数</li>
-<li>在handleSystemServerProcess函数内部主要的操作有下:<ul>
-<li>为systemServer类创建一个classloader,注意这个classLoader是一个PathClassLoader,然后把这个classloader设置给当前SystemServer所在的线程Thread.currentThread().setContextClassLoader(cl);紧接着调用RuntimeInit.initZygote()函数。     </li>
-<li>在RuntimeInit.initZygote()函数中执行下面的几个函数: 最重要的内容<ul>
-<li>commonInit();<ul>
-<li>首先是实例化一个Timezone对象出来,也就是初始化时区用的</li>
-</ul>
-</li>
-<li>nativeZygoteInit();<ul>
-<li>native 方法 调用了gCurRuntime-&gt;onZygoteInit();其中gCurRuntime是AndroidRuntime的一个指针对象。</li>
-<li>onZygoteInit()函数是AndroidRuntime.h文件里面的一个序函数</li>
-<li>AndroidRuntime.h在Main_app.cpp文件中被引用, onZygoteInit函数的实现如下:proc-&gt;startThreadPool(); 也就是启动了一个线程池对象。 </li>
-<li>其中的processState. startThreadPool()函数内容为:sp<thread> t = new PoolThread(isMain); 创建一个pooledThread,并且运行它.</thread></li>
-</ul>
-</li>
-<li>applicationInit(targetSDK,args,classLoader)重点: invokeStaticMain()整个应用的初始化的入口<ul>
-<li>invokeStaticMain函数的第一个参数是一个className string;第二个参数是一个String[]也就是main()的参数列表,第三个参数是用于加载className的加载器</li>
-<li>目的就是为了调用className的main()函数，具体方式就是反射调用main()函数。在这里解答了之前的疑问:那么多的系统级别的服务都有一个main()函数，这些main()函数都是谁在调用来着?原因就在这里,通过传入系统级别的服务className进来，就可以通过invokeStaticMain()函数来一一启动这些系统级别服务的main()函数了。</li>
-<li>此函数的终点是把这个className的main() method对象和参数列表传递给Zygote.MethodAndArgsCaller(m,args[])函数.</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Zygote.MethodAndArgsCaller()函数做了什么呢?<ul>
-<li>MethodAndArgsCaller是一个Runnable对象,它的run()里面执行的任务就是method.invoke(args[objs]).也就是简单的把传进来的method和参数列表结合 然后调用他们即可.</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>还有一个就是SystemServer.main()干了什么事儿?</p>
-<ul>
-<li>第一个就是调整一下系统时间</li>
-<li>启动本地服务 诸如surfaceFlinger/AudioFlinger…</li>
-<li><p>启动ServerThread(并非是一个继承Thread的类), 负责如下的服务的初始化</p>
-<p>Installer installer = null;<br>AccountManagerService accountManager = null;<br>ContentService contentService = null;<br>LightsService lights = null;<br>PowerManagerService power = null;<br>DisplayManagerService display = null;<br>BatteryService battery = null;<br>VibratorService vibrator = null;<br>AlarmManagerService alarm = null;<br>MountService mountService = null;<br>NetworkManagementService networkManagement = null;<br>NetworkStatsService networkStats = null;<br>NetworkPolicyManagerService networkPolicy = null;<br>ConnectivityService connectivity = null;<br>WifiP2pService wifiP2p = null;<br>WifiService wifi = null;<br>NsdService serviceDiscovery= null;<br>IPackageManager pm = null;<br>Context context = null;<br>WindowManagerService wm = null;<br>BluetoothManagerService bluetooth = null;<br>DockObserver dock = null;<br>UsbService usb = null;<br>SerialService serial = null;<br>TwilightService twilight = null;<br>UiModeManagerService uiMode = null;<br>RecognitionManagerService recognition = null;<br>NetworkTimeUpdateService networkTimeUpdater = null;<br>CommonTimeManagementService commonTimeMgmtService = null;<br>InputManagerService inputManager = null;<br>TelephonyRegistry telephonyRegistry = null;<br>ConsumerIrService consumerIr = null;</p>
-</li>
-</ul>
-</li>
-</ul>
-<p>HandlerThread wmHandlerThread = new HandlerThread(“WindowManager”);<br>创建了一个name 为WindowManager的HandlerThread对象,并且创建出一个Handler对象把HandlerThread的looper对象复值给这个Handler对象，从而组建出一个Handler + Looper + MessageQueue完整的消息调度体系。</p>
-<p>分析Installd 也就是安装服务的启动流程:</p>
-<ul>
-<li>installer = new Installer(); Installer 是继承自systemService的,而systemService是一个关于运行在系统进程的服务类的一个抽象。所有抽象出来的系统服务有几个特性: 初始化的时候都需要一个Context对象;onStart()是服务的起点;</li>
-<li>installer真正的安装流程放到了installerConnection身上:<ul>
-<li>installerConnection对象的execute()函数就是把参数格式化成一个命令行传入到execute()中,最终调用transact(cmd)来获取安装结果:</li>
-<li>在执行transact()之前需要检测一下socket的连接状态.<br>接着就是power = new PowerManagerService(); 把powerManagerService注册到ServiceManager中</li>
-</ul>
-</li>
-</ul>
-<p>继续执行的就是初始化context(Context对象)对象:(可见这里也启动了ActivityThread对象的入口函数以及启动了ActivityManagerService的startRunning()函数了)<br>   context = ActivityManagerService.main(factoryTest); ?为何只有在4.4.x里面有这个main入口到了5.0.x版本就没有了呢?<br>   在main()里面启动了一个AThread对象,这个AThread对象里面持有一个 ActivityManagerService对象mService,在此线程中初始化了这个mService对象。<br>   同时初始化一个ActivityThread对象at(真是一个重量级对象,ContextImpl对象也是在这里初始化的,还有获取LoadedApk信息和资源的加载),从这个activityThread对象中取出context对象,一般这个时候就可以给这个context对象设置系统主题资源了。并且把获取到的ActivityThread里面的context对象设置给 ActivityManagerService对象的成员变量mContext;这个时候的    ActivityManagerService对象mService就已经完成了基本的成员初始化，所以就开始调用mService的startRunning()函数了<br>   在ActivityThread的systemMain()函数里面就是实例化thread并且把线程attach()一下。<br>   startRunning()-&gt;systemReady()…..<br>下面的就是各种服务添加到serviceManager和启动他们(当然又是一对native初始化代码)</p>
-</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/10/10/一些疑问记录-待答-/" data-id="cj1ytj9x1000i8wbyfx81rxru" class="article-share-link">Partager</a>
-      
-      
     </footer>
   </div>
   
@@ -429,6 +364,10 @@
       <ul>
         
           <li>
+            <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
+          </li>
+        
+          <li>
             <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
           </li>
         
@@ -442,10 +381,6 @@
         
           <li>
             <a href="/2017/02/21/I-O/">I/O</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
           </li>
         
       </ul>

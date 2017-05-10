@@ -59,6 +59,117 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-一些疑问记录-待答-" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/10/一些疑问记录-待答-/" class="article-date">
+  <time datetime="2016-10-10T02:01:04.000Z" itemprop="datePublished">2016-10-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/10/一些疑问记录-待答-/">一些疑问记录(待答).md</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <a id="more"></a>
+<ul>
+<li>在开发中遇到弹窗，如何高效的处理弹窗问题?(既能够避免使用Activity也能够使得dialog拥有Activity一样的机制? 实质上就是window的管理问题)</li>
+<li>DecorView和ViewRoot(Impl)两者之间是啥关系来着?</li>
+<li>Android虚拟机和Zygote进程到底是什么关系来着? 是虚拟机运行在Zygote进程中还是Zygote进程在虚拟机中运行?stackoverflow: what is the relationship between vm and zygote process?<ul>
+<li>当zygote发生了一次fork(),也就是相当于创建出一个新的vm    </li>
+</ul>
+</li>
+<li>Java层在创建一个Looper的时候同时初始化了一个MessageQueue出来,而MQ的初始化代码是一段native层的代码:仔细看nativeMessageQueueInit发现，在native层实际上也初始化了一个new Looper(false);那么这个native层的Looper对象和Java层的Looper对象有什么联系呢?</li>
+<li><p>Java代码时如何跟native代码进行交互的?</p>
+<ul>
+<li>c里面的指针可以传递给java层,java层每次调用相关native代码把这个ptr作为参数传递进去就可以告知native层具体去操作哪一个对象了.</li>
+</ul>
+</li>
+<li><p>adb中 /system/bin/app_process*里面的app_process64(32)是干啥的?</p>
+<ul>
+<li>这个app_process也就是zygote processde代表，app_process化名为App_Main.cpp文件 存在于cmds/app_process下 代码量还比较少    </li>
+<li>注意在app_process的 main()函数里面读取传入的参数，根据参数来执行类似的命令<em>runtime.start(“com.android.internal.os.ZygoteInit”, args);</em> 也就是说启动了zygote进程的main()函数.可以把app_process看作是一个壳，负载了zygote/servicemanager的启动。</li>
+<li>这个runtime对象的初始化过程中就通过startVm()来启动了虚拟机;接着这个zygoteInit程序就运行在启动了的虚拟机上了.</li>
+<li><p>android的系统服务 SystemServer启动入口:</p>
+<ul>
+<li>zygoteInit.startSystemServer()就是入口; 在这个函数内部主要做的工作就是fork一个子进程出来让子进程去继续完成剩下的未启动的系统服务列表;如果这些系统级别的服务都启动好了的话就可以进入launcher界面了.详情查看handleSystemServerProcess函数</li>
+<li>在handleSystemServerProcess函数内部主要的操作有下:<ul>
+<li>为systemServer类创建一个classloader,注意这个classLoader是一个PathClassLoader,然后把这个classloader设置给当前SystemServer所在的线程Thread.currentThread().setContextClassLoader(cl);紧接着调用RuntimeInit.initZygote()函数。     </li>
+<li>在RuntimeInit.initZygote()函数中执行下面的几个函数: 最重要的内容<ul>
+<li>commonInit();<ul>
+<li>首先是实例化一个Timezone对象出来,也就是初始化时区用的</li>
+</ul>
+</li>
+<li>nativeZygoteInit();<ul>
+<li>native 方法 调用了gCurRuntime-&gt;onZygoteInit();其中gCurRuntime是AndroidRuntime的一个指针对象。</li>
+<li>onZygoteInit()函数是AndroidRuntime.h文件里面的一个序函数</li>
+<li>AndroidRuntime.h在Main_app.cpp文件中被引用, onZygoteInit函数的实现如下:proc-&gt;startThreadPool(); 也就是启动了一个线程池对象。 </li>
+<li>其中的processState. startThreadPool()函数内容为:sp<thread> t = new PoolThread(isMain); 创建一个pooledThread,并且运行它.</thread></li>
+</ul>
+</li>
+<li>applicationInit(targetSDK,args,classLoader)重点: invokeStaticMain()整个应用的初始化的入口<ul>
+<li>invokeStaticMain函数的第一个参数是一个className string;第二个参数是一个String[]也就是main()的参数列表,第三个参数是用于加载className的加载器</li>
+<li>目的就是为了调用className的main()函数，具体方式就是反射调用main()函数。在这里解答了之前的疑问:那么多的系统级别的服务都有一个main()函数，这些main()函数都是谁在调用来着?原因就在这里,通过传入系统级别的服务className进来，就可以通过invokeStaticMain()函数来一一启动这些系统级别服务的main()函数了。</li>
+<li>此函数的终点是把这个className的main() method对象和参数列表传递给Zygote.MethodAndArgsCaller(m,args[])函数.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Zygote.MethodAndArgsCaller()函数做了什么呢?<ul>
+<li>MethodAndArgsCaller是一个Runnable对象,它的run()里面执行的任务就是method.invoke(args[objs]).也就是简单的把传进来的method和参数列表结合 然后调用他们即可.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>还有一个就是SystemServer.main()干了什么事儿?</p>
+<ul>
+<li>第一个就是调整一下系统时间</li>
+<li>启动本地服务 诸如surfaceFlinger/AudioFlinger…</li>
+<li><p>启动ServerThread(并非是一个继承Thread的类), 负责如下的服务的初始化</p>
+<p>Installer installer = null;<br>AccountManagerService accountManager = null;<br>ContentService contentService = null;<br>LightsService lights = null;<br>PowerManagerService power = null;<br>DisplayManagerService display = null;<br>BatteryService battery = null;<br>VibratorService vibrator = null;<br>AlarmManagerService alarm = null;<br>MountService mountService = null;<br>NetworkManagementService networkManagement = null;<br>NetworkStatsService networkStats = null;<br>NetworkPolicyManagerService networkPolicy = null;<br>ConnectivityService connectivity = null;<br>WifiP2pService wifiP2p = null;<br>WifiService wifi = null;<br>NsdService serviceDiscovery= null;<br>IPackageManager pm = null;<br>Context context = null;<br>WindowManagerService wm = null;<br>BluetoothManagerService bluetooth = null;<br>DockObserver dock = null;<br>UsbService usb = null;<br>SerialService serial = null;<br>TwilightService twilight = null;<br>UiModeManagerService uiMode = null;<br>RecognitionManagerService recognition = null;<br>NetworkTimeUpdateService networkTimeUpdater = null;<br>CommonTimeManagementService commonTimeMgmtService = null;<br>InputManagerService inputManager = null;<br>TelephonyRegistry telephonyRegistry = null;<br>ConsumerIrService consumerIr = null;</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>HandlerThread wmHandlerThread = new HandlerThread(“WindowManager”);<br>创建了一个name 为WindowManager的HandlerThread对象,并且创建出一个Handler对象把HandlerThread的looper对象复值给这个Handler对象，从而组建出一个Handler + Looper + MessageQueue完整的消息调度体系。</p>
+<p>分析Installd 也就是安装服务的启动流程:</p>
+<ul>
+<li>installer = new Installer(); Installer 是继承自systemService的,而systemService是一个关于运行在系统进程的服务类的一个抽象。所有抽象出来的系统服务有几个特性: 初始化的时候都需要一个Context对象;onStart()是服务的起点;</li>
+<li>installer真正的安装流程放到了installerConnection身上:<ul>
+<li>installerConnection对象的execute()函数就是把参数格式化成一个命令行传入到execute()中,最终调用transact(cmd)来获取安装结果:</li>
+<li>在执行transact()之前需要检测一下socket的连接状态.<br>接着就是power = new PowerManagerService(); 把powerManagerService注册到ServiceManager中</li>
+</ul>
+</li>
+</ul>
+<p>继续执行的就是初始化context(Context对象)对象:(可见这里也启动了ActivityThread对象的入口函数以及启动了ActivityManagerService的startRunning()函数了)<br>   context = ActivityManagerService.main(factoryTest); ?为何只有在4.4.x里面有这个main入口到了5.0.x版本就没有了呢?<br>   在main()里面启动了一个AThread对象,这个AThread对象里面持有一个 ActivityManagerService对象mService,在此线程中初始化了这个mService对象。<br>   同时初始化一个ActivityThread对象at(真是一个重量级对象,ContextImpl对象也是在这里初始化的,还有获取LoadedApk信息和资源的加载),从这个activityThread对象中取出context对象,一般这个时候就可以给这个context对象设置系统主题资源了。并且把获取到的ActivityThread里面的context对象设置给 ActivityManagerService对象的成员变量mContext;这个时候的    ActivityManagerService对象mService就已经完成了基本的成员初始化，所以就开始调用mService的startRunning()函数了<br>   在ActivityThread的systemMain()函数里面就是实例化thread并且把线程attach()一下。<br>   startRunning()-&gt;systemReady()…..<br>下面的就是各种服务添加到serviceManager和启动他们(当然又是一对native初始化代码)</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2016/10/10/一些疑问记录-待答-/" data-id="cj2io4lqq000nbxbynsc7f94y" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-json反-序列化的优劣势" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/09/22/json反-序列化的优劣势/" class="article-date">
@@ -100,7 +211,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/22/json反-序列化的优劣势/" data-id="cj1ytj9x4000l8wbyb99p040l" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/09/22/json反-序列化的优劣势/" data-id="cj2io4lqo000mbxbyrajja2r2" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/序列化协议/">序列化协议</a></li></ul>
@@ -164,7 +275,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/09/Gradle中的文件操作/" data-id="cj1ytj9vw00028wby71hond1h" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/09/09/Gradle中的文件操作/" data-id="cj2io4lpw0003bxbynd25rjzj" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gradle-构建工具/">Gradle 构建工具</a></li></ul>
@@ -218,54 +329,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" data-id="cj1ytj9x8000n8wbyotb6me2d" class="article-share-link">Partager</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-新生代gc会去遍历老生代区查看被引用的对象吗?" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" class="article-date">
-  <time datetime="2016-09-03T11:51:34.000Z" itemprop="datePublished">2016-09-03</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/gc/">gc</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/">新生代gc会去遍历老生代区查看被引用的对象吗?</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://www.cubrid.org/files/attach/images/220547/284/313/card-table-structure.png" alt="图示"></p>
-        
-          <p class="article-more-link">
-            <a href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" data-id="cj1ytj9xe000r8wbyofh0gelu" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2016/09/04/使用ThreadLocal-storage来避免lock带来的性能损耗问题/" data-id="cj2io4lqv000qbxbyez0z2a6l" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
@@ -295,6 +359,10 @@
       <ul>
         
           <li>
+            <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
+          </li>
+        
+          <li>
             <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
           </li>
         
@@ -308,10 +376,6 @@
         
           <li>
             <a href="/2017/02/21/I-O/">I/O</a>
-          </li>
-        
-          <li>
-            <a href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
           </li>
         
       </ul>
