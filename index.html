@@ -93,11 +93,13 @@
 <p>对于这样的问题, ListenableFuture提供了一个注册listener机制, 在任务结束结束的时刻即可通过此listener来回馈计算结果. 相比较于Future, ListenableFuture新增的函数为:</p>
 <p>addListener(Runnable listener, Executor executor);</p>
 <p>其中的参数listener对象就是作为一个回调传入到task的内部, 在workThread开始执行了run()方法并且拿到结果后, 就立马通过listener.run()函数来通知调用方结果可用, 不再需要调用方通过get()去拿一个”未知状态”的result。这样使得并发操作更为简便以及准确了.</p>
+<p>顺带着说一下线程池(Executor)与ListenableFuture的完美配合, 前者专注于多线程的调度, 为后者提供一个可靠的运行环境而不需要具体考虑任务执行的逻辑; 后者则专注于任务的执行以及结果的回调而不需要考虑任务执行所在的环境问题. 从而实现了异步编程这个抽象目标.</p>
+<p>但是话说回来, 对于嵌套的FutureTask可能就会出现一些问题了, 具体参考gist上的这个 <img src="https://gist.github.com/benjchristensen/4671081" alt="Example"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2io4lpu0002bxbysz4uawnh" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2kb5h6t00066ibyl4qk61km" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future-并发/">Future/并发</a></li></ul>
@@ -147,7 +149,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj2io4lq50006bxbyevbyg78e" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj2kb5h76000f6ibyvx6ceexh" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -233,7 +235,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj2io4lqf000cbxbyhkseb4rh" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj2kb5h7100096iby8gxl9n0r" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -297,7 +299,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj2io4lqm000jbxbysfn5zz24" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj2kb5h77000g6ibyk8e2gfpa" class="article-share-link">Partager</a>
       
       
     </footer>

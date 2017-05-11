@@ -15,12 +15,14 @@ Future对象被视作为一个异步计算任务的结果对象, 它提供方法
 <meta property="og:description" content="介绍:
 Future是JDK7中并发包里新增的一个接口, 持有的范型 即为调用Future的get()返回的值类型. 
 Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置">
-<meta property="og:updated_time" content="2017-05-10T07:32:54.000Z">
+<meta property="og:image" content="https://gist.github.com/benjchristensen/4671081">
+<meta property="og:updated_time" content="2017-05-11T03:49:12.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Head First Java Future">
 <meta name="twitter:description" content="介绍:
 Future是JDK7中并发包里新增的一个接口, 持有的范型 即为调用Future的get()返回的值类型. 
 Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置">
+<meta name="twitter:image" content="https://gist.github.com/benjchristensen/4671081">
   
     <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
   
@@ -101,11 +103,13 @@ Future对象被视作为一个异步计算任务的结果对象, 它提供方法
 <p>对于这样的问题, ListenableFuture提供了一个注册listener机制, 在任务结束结束的时刻即可通过此listener来回馈计算结果. 相比较于Future, ListenableFuture新增的函数为:</p>
 <p>addListener(Runnable listener, Executor executor);</p>
 <p>其中的参数listener对象就是作为一个回调传入到task的内部, 在workThread开始执行了run()方法并且拿到结果后, 就立马通过listener.run()函数来通知调用方结果可用, 不再需要调用方通过get()去拿一个”未知状态”的result。这样使得并发操作更为简便以及准确了.</p>
+<p>顺带着说一下线程池(Executor)与ListenableFuture的完美配合, 前者专注于多线程的调度, 为后者提供一个可靠的运行环境而不需要具体考虑任务执行的逻辑; 后者则专注于任务的执行以及结果的回调而不需要考虑任务执行所在的环境问题. 从而实现了异步编程这个抽象目标.</p>
+<p>但是话说回来, 对于嵌套的FutureTask可能就会出现一些问题了, 具体参考gist上的这个 <img src="https://gist.github.com/benjchristensen/4671081" alt="Example"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2io4lpu0002bxbysz4uawnh" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2kb5h6t00066ibyl4qk61km" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future-并发/">Future/并发</a></li></ul>
