@@ -46,9 +46,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -58,6 +58,51 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-ThreadLocal的工作原理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/12/02/ThreadLocal的工作原理/" class="article-date">
+  <time datetime="2015-12-02T09:16:45.000Z" itemprop="datePublished">2015-12-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《Android开发艺术探索》笔记/">《Android开发艺术探索》笔记</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/12/02/ThreadLocal的工作原理/">ThreadLocal的工作原理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Q:为何说可以通过ThreadLocal实现在同一进程内维护同一数据在不同线程中各自的值并且互不干扰?</p>
+        
+          <p class="article-more-link">
+            <a href="/2015/12/02/ThreadLocal的工作原理/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2015/12/02/ThreadLocal的工作原理/" data-id="cj3v8l79800092oby456thm2x" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-关于broadcastReceiver与service交互时调用peekService的疑问" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -98,7 +143,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/11/16/关于broadcastReceiver与service交互时调用peekService的疑问/" data-id="cj2kb5h7o000u6ibym655u23l" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2015/11/16/关于broadcastReceiver与service交互时调用peekService的疑问/" data-id="cj3v8l79l000i2obylaw681pp" class="article-share-link">Share</a>
       
       
     </footer>
@@ -144,7 +189,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/08/02/处理Runtime-Changed的官方建议/" data-id="cj2kb5h7k000r6ibyz6h8dv7i" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2015/08/02/处理Runtime-Changed的官方建议/" data-id="cj3v8l79v000w2obyvsn7ah32" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Runtime-Changed/">Runtime Changed</a></li></ul>
@@ -193,7 +238,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/05/10/Bitmap相关tips的笔记/" data-id="cj2kb5h6h00026ibyjk99fr1o" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2015/05/10/Bitmap相关tips的笔记/" data-id="cj3v8l79z00132obymbtvnl86" class="article-share-link">Share</a>
       
       
     </footer>
@@ -207,7 +252,7 @@
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/4/">&laquo; Précédent</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
+    <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
   </nav>
 
 </section>
@@ -216,9 +261,13 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Articles récents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/">ContentResolver.query-&gt;ContentProvider.query的流程.md</a>
+          </li>
         
           <li>
             <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
@@ -236,10 +285,6 @@
             <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
           </li>
         
-          <li>
-            <a href="/2017/02/21/I-O/">I/O</a>
-          </li>
-        
       </ul>
     </div>
   </div>
@@ -253,7 +298,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2017 Aaron<br>
-      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>

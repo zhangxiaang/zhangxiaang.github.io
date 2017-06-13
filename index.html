@@ -46,9 +46,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -58,6 +58,50 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-ContentResolver-query-ContentProvider-query的流程-md" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" class="article-date">
+  <time datetime="2017-06-12T10:50:00.000Z" itemprop="datePublished">2017-06-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/">ContentResolver.query-&gt;ContentProvider.query的流程.md</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>每一个Application都有一个全局的mContentResolver对象, 作为内部类继承ContentProvider. 主要的职责是根据提供的auth字符串来找到一个可用的ContentProvider. 在mContentResolver的实现中覆盖了ContentProvider的抽象函数acquireProvider(Context context,String auth)和acquireExistingProvider(Context context,String auth)函数, 把定位ContentProvider的逻辑转交给了ActivityThread对象内部处理:<br>在acquireProvider的入口,先检测是否已经有可用的Providers对象,如果是查询已经存在了的ContentProvider则走acquireExistingProvider(), 否则继续走installProviders的流程.<br>在acquireExistingProvider()函数中首先是对mProviderMap对象的同步加锁操作, 避免出现竞态问题. mProviderMap是一个ProviderKey-&gt;ProviderClient的Map对象, 存放的ContentProvider为当前进程内的ContentProviders, 而ProviderKey是由(authString,userId)组成的一个Provider唯一标志符. 在检索出对应的ProviderClientRecorder后还得检查一下此ContentProvider附着的进程是否是Alive状态, 否则也是不可用的。只有在可用的状态下, 才会拿到一个ContentProvider对应的一个IBinder接口对象, 后续就能通过此Binder接口进行Uri数据交互啦.</p>
+<p>如果是走installProviders的流程, 则通过ActivityManagerService对象的getContentProviderImpl()实现; 在通过getDefault()获取到的就是ActivityManager的一个代理对象, 通过binder代理对象的getContentProvider()接口调用到ActivityManagerService端的getContentProvider(). ActivityManagerService端的getContentProviderImpl()函数是核心实现代码. </p>
+<p>在ActivityManagerService中也有一个mProviderMap对象,不过是一个ProviderMap的对象. 可以通过conponentName+uid 来查询到一个ContentProviderRecord对象, 首先用的是普通传递过来的UID配合conponentName去查,如果没查到, 则把UID换成root级别也就是uid=0 来查询ContentProviderRecord对象, 在拿到这个ContentProviderRecord对象后继续对其进行单例检查, </p>
+<ul>
+<li>如果得到的ContentProviderRecord不为空, 在通过权限检查后通过recorder初始化出一个 ContentProviderHolder返回即可. </li>
+<li>如果得到的ContentProviderRecord为空, 根据ComponentName，从ActivityManagerService.mProviderMap中查询相应的ContentProviderRecord;当首次调用，则创建对象ContentProviderRecord.然后返回.</li>
+</ul>
+<p>所以可以理解流程为: ContentProvider在本地进程中如果有可用的话, 则直接从ActivityThread的mProviderMap对象中根据AuthString找到对应的provider;(此阶段尚处于Client_Process)<br>如果本地进程中并没有install过provider的话则需要AMS来先搜索一下对应ComponentName的provider对象(System_process), 如果系统进程尚未加载过对应的Provider, 则跳到installProvider的流程中, 把最终即将publish的Provider回馈给系统进程, 系统进程告知 Client_Process 添加新的ContentProvider对象到mProviderMap对象里面.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" data-id="cj3v8l78e00012obyemzgbpcm" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-Head-First-Java-Future" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -99,7 +143,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj2kb5h6t00066ibyl4qk61km" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj3v8l78p00042oby8yxbdb3b" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future-并发/">Future/并发</a></li></ul>
@@ -149,7 +193,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj2kb5h76000f6ibyvx6ceexh" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj3v8l7a200152obyxv646883" class="article-share-link">Share</a>
       
       
     </footer>
@@ -235,71 +279,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj2kb5h7100096iby8gxl9n0r" class="article-share-link">Partager</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-synchronized-vs-volatile" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/03/21/synchronized-vs-volatile/" class="article-date">
-  <time datetime="2017-03-21T10:43:48.000Z" itemprop="datePublished">2017-03-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>java的线程内存模型分为了主内存和工作线程, 由于线程运行于不同的CPU中, 所以说不同的线程是没办法读取到彼此之间的内存数据的, 而多个线程之所以看起来能够操作主内存的某一个共享变量, 实际的过程是各个线程把此变量copy到自己的工作内存中，实际是对copy的操作，最后刷入到主内存中。而此过程中各个线程无法确保自己copy到的变量的值就是最新的值, 比方说十个线程对同一个变量执行+1操作, 可能第十个线程去copy这个变量的时候其他九个线程还没把最新的执行结果刷入到主内存中，导致第十个线程+1得到的结果不等于原来的变量+10的期望值。所以需要来保证线程的安全性</p>
-<p>synchronized:</p>
-<p>synchronized修饰的是某一个变量或者方法, 保证它所在的内存块加了一个同步锁, 每一个线程对synchronized修饰过了的内存区域操作的时候都会获取同步锁, 只有获取了同步锁的线程才可以操作住内存, 在释放同步锁的时候把最新值刷入到住内存中。依靠锁的唯一可获取性保证了共享内存的正确性.</p>
-<p>volatile:</p>
-<p>保证了多个线程之间共享变量的可见性, (默认的情况下操作一个共享变量是先把这个变量copy到自己的工作内存执行操作的, 导致其他线程对共享内存的最新值的不可见性)<br>既然synchronized的原理是给内存块添加同步锁,那么volatile的实现原理是什么呢?<br>通过编译后对比没有添加volatile的变量, 发现有volatile变量编译后多了一条指令:<br>lock addl $0x0,(%esp);<br>这条指令保证了两件事:</p>
-<ul>
-<li>当前线程的工作区域中被volatile修饰的内存块的数据刷新到主内存中；(保证主内存中是最新值)</li>
-<li>刷新当前线程的工作内存中变量值到主内存的同时还会导致其他线程中的工作内存中缓存的该共享变量地址指向的数据值无效.(剔除了非最新值对住内存中共享变量值污染的可能性)。</li>
-</ul>
-<p>虽然volatile的消耗低,但是volatile只是提供了变量的可见性(具体方式参考上面说的),却没有提供原子性,(synchronized的原子性由锁的特征提供).这会导致一些问题,诸如多线程计数不准确问题.</p>
-<p>原子操作指的是一组不可被中断的操作, 以i++为例子, 它实际上包含了load(from main memory) , add(in work memory) ,save(to main memory) 三个操作, 在多处理器环境中同时执行这个操作就可能导致这组指令被打断, 可能在cpu1在执行add指令还没执行到save指令的时候, cpu2就从main memory中load i的值此时的i并非是最新的value. 因此说i++操作不是一个原子性的操作. 需要借助concurrent包里面的atomaticInteger来实现此目的, 它确保了一个操作的原子性, 那么是如何实现的呢?</p>
-<p>volatile实现了一个目标: 确保了其他线程读取到的i变量是最新的value,然而离计算出正确的i的值还缺少一个步骤: 如何保证多个线程在load到最新的值之后依次的把各自内存中修改过后的变量i save到主内存中? 然而volatile限制了这个功能: 被volatile修饰过的变量的值一旦被改动,将会导致拷贝了此变量到工作内存中的其他线程无法再次操作这个变量的副本, 也无法save回主内存. 所以用volatile的话还是得同时配合synchronized来实现线程安全的目标啊.例如DCL</p>
-<p>那么原子操作的实现原理是什么呢?<br>锁就不说了,说说compare and swap算法来实现自旋CAS —&gt; 自旋CAS实现的基本思路就是循环进行CAS操作直到成功为止<br>那么单次的CAS是怎样的呢?</p>
-<pre><code>boolean compareAndSwap(int mainmemoryValue,int workmemoryOldValue,int workMemoryNewValue){
-    if(mainMemoryValue != workMemoryOldValue){
-        return false;
-    }
-    mainmemoryValue = workMemoryNewValue;
-    return true;
-}
-</code></pre><p>以上是java伪代码, 实际上的实现是c++完成的, 唯一的不同就是此算法的第一个参数是一个指向mainMemory的变量的一个指针, 只有当来自workMemory的变量值等于主内存中该变量的值的时候才能认为是衔接上一条指令的操作，将workMemory中最新的值刷入到主内存指针指向的value.从而保证了一组操作的原子性。</p>
-<p>CAS依旧存在的限制:</p>
-<ul>
-<li><p>ABA问题:<br>  两个进程, 一个进程在load到主线程变量A的值后因某种原因挂掉了, 后来的进程2再次load这个变量A把他的值从1改到了10再从10改回了1, 此时的进程1重启了发现变量A的值没有改变, 那么进程1是无法感知到进程2对变量a的1-&gt;10,10-&gt;1的这个过程。可能在java中只是值的变动感知不到这个影响,但是如果发生在c＋＋中的指针比较交换的话，就容易发生问题: 具体的例子参考wiki <img src="https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2" alt="比较并交换"> </p>
-</li>
-<li><p>由于自旋的过程就是不断的执行cas，倘若cas长时间不成功, 就导致cpu长时间的空转</p>
-</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj2kb5h77000g6ibyk8e2gfpa" class="article-share-link">Partager</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj3v8l78n00032oby2o3s04wm" class="article-share-link">Share</a>
       
       
     </footer>
@@ -313,7 +293,7 @@
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Suivant &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -322,9 +302,13 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Articles récents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/">ContentResolver.query-&gt;ContentProvider.query的流程.md</a>
+          </li>
         
           <li>
             <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
@@ -342,10 +326,6 @@
             <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
           </li>
         
-          <li>
-            <a href="/2017/02/21/I-O/">I/O</a>
-          </li>
-        
       </ul>
     </div>
   </div>
@@ -359,7 +339,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2017 Aaron<br>
-      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>

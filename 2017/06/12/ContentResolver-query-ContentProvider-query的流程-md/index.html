@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ContentResolver.query-&gt;ContentProvider.query的流程.md | 张翔的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="每一个Application都有一个全局的mContentResolver对象, 作为内部类继承ContentProvider. 主要的职责是根据提供的auth字符串来找到一个可用的ContentProvider. 在mContentResolver的实现中覆盖了ContentProvider的抽象函数acquireProvider(Context context,String auth)和acq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ContentResolver.query->ContentProvider.query的流程.md">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/index.html">
+<meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="每一个Application都有一个全局的mContentResolver对象, 作为内部类继承ContentProvider. 主要的职责是根据提供的auth字符串来找到一个可用的ContentProvider. 在mContentResolver的实现中覆盖了ContentProvider的抽象函数acquireProvider(Context context,String auth)和acq">
+<meta property="og:updated_time" content="2017-06-13T07:18:43.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ContentResolver.query->ContentProvider.query的流程.md">
+<meta name="twitter:description" content="每一个Application都有一个全局的mContentResolver对象, 作为内部类继承ContentProvider. 主要的职责是根据提供的auth字符串来找到一个可用的ContentProvider. 在mContentResolver的实现中覆盖了ContentProvider的抽象函数acquireProvider(Context context,String auth)和acq">
+  
+    <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">张翔的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ContentResolver-query-ContentProvider-query的流程-md" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" class="article-date">
+  <time datetime="2017-06-12T10:50:00.000Z" itemprop="datePublished">2017-06-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ContentResolver.query-&gt;ContentProvider.query的流程.md
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>每一个Application都有一个全局的mContentResolver对象, 作为内部类继承ContentProvider. 主要的职责是根据提供的auth字符串来找到一个可用的ContentProvider. 在mContentResolver的实现中覆盖了ContentProvider的抽象函数acquireProvider(Context context,String auth)和acquireExistingProvider(Context context,String auth)函数, 把定位ContentProvider的逻辑转交给了ActivityThread对象内部处理:<br>在acquireProvider的入口,先检测是否已经有可用的Providers对象,如果是查询已经存在了的ContentProvider则走acquireExistingProvider(), 否则继续走installProviders的流程.<br>在acquireExistingProvider()函数中首先是对mProviderMap对象的同步加锁操作, 避免出现竞态问题. mProviderMap是一个ProviderKey-&gt;ProviderClient的Map对象, 存放的ContentProvider为当前进程内的ContentProviders, 而ProviderKey是由(authString,userId)组成的一个Provider唯一标志符. 在检索出对应的ProviderClientRecorder后还得检查一下此ContentProvider附着的进程是否是Alive状态, 否则也是不可用的。只有在可用的状态下, 才会拿到一个ContentProvider对应的一个IBinder接口对象, 后续就能通过此Binder接口进行Uri数据交互啦.</p>
+<p>如果是走installProviders的流程, 则通过ActivityManagerService对象的getContentProviderImpl()实现; 在通过getDefault()获取到的就是ActivityManager的一个代理对象, 通过binder代理对象的getContentProvider()接口调用到ActivityManagerService端的getContentProvider(). ActivityManagerService端的getContentProviderImpl()函数是核心实现代码. </p>
+<p>在ActivityManagerService中也有一个mProviderMap对象,不过是一个ProviderMap的对象. 可以通过conponentName+uid 来查询到一个ContentProviderRecord对象, 首先用的是普通传递过来的UID配合conponentName去查,如果没查到, 则把UID换成root级别也就是uid=0 来查询ContentProviderRecord对象, 在拿到这个ContentProviderRecord对象后继续对其进行单例检查, </p>
+<ul>
+<li>如果得到的ContentProviderRecord不为空, 在通过权限检查后通过recorder初始化出一个 ContentProviderHolder返回即可. </li>
+<li>如果得到的ContentProviderRecord为空, 根据ComponentName，从ActivityManagerService.mProviderMap中查询相应的ContentProviderRecord;当首次调用，则创建对象ContentProviderRecord.然后返回.</li>
+</ul>
+<p>所以可以理解流程为: ContentProvider在本地进程中如果有可用的话, 则直接从ActivityThread的mProviderMap对象中根据AuthString找到对应的provider;(此阶段尚处于Client_Process)<br>如果本地进程中并没有install过provider的话则需要AMS来先搜索一下对应ComponentName的provider对象(System_process), 如果系统进程尚未加载过对应的Provider, 则跳到installProvider的流程中, 把最终即将publish的Provider回馈给系统进程, 系统进程告知 Client_Process 添加新的ContentProvider对象到mProviderMap对象里面.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" data-id="cj3v8l78e00012obyemzgbpcm" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/05/10/Head-First-Java-Future/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Head First Java Future</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/">ContentResolver.query-&gt;ContentProvider.query的流程.md</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Aaron<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
