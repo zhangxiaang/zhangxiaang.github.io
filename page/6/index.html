@@ -3,30 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>统计Android项目java文件代码量 | 张翔的博客</title>
+  <title>张翔的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="切到项目的java文件目录下:1$ find . &quot;(&quot; -name &quot;*.java&quot; &quot;)&quot; -print | xargs wc -l
-即可获取到java文件的代码量
-add
-批量修改指定文件夹下的匹配上的字符串
-find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
-<meta property="og:type" content="article">
-<meta property="og:title" content="统计Android项目java文件代码量">
-<meta property="og:url" content="http://zhangxiaang.github.io/2016/03/01/统计代码量/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="张翔的博客">
+<meta property="og:url" content="http://zhangxiaang.github.io/page/6/index.html">
 <meta property="og:site_name" content="张翔的博客">
-<meta property="og:description" content="切到项目的java文件目录下:1$ find . &quot;(&quot; -name &quot;*.java&quot; &quot;)&quot; -print | xargs wc -l
-即可获取到java文件的代码量
-add
-批量修改指定文件夹下的匹配上的字符串
-find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
-<meta property="og:updated_time" content="2016-07-12T15:36:35.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="统计Android项目java文件代码量">
-<meta name="twitter:description" content="切到项目的java文件目录下:1$ find . &quot;(&quot; -name &quot;*.java&quot; &quot;)&quot; -print | xargs wc -l
-即可获取到java文件的代码量
-add
-批量修改指定文件夹下的匹配上的字符串
-find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
+<meta name="twitter:title" content="张翔的博客">
   
     <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
   
@@ -73,14 +57,16 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-统计代码量" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main">
+  
+    <article id="post-Bitmap相关tips的笔记" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/01/统计代码量/" class="article-date">
-  <time datetime="2016-03-01T11:42:35.000Z" itemprop="datePublished">2016-03-01</time>
+    <a href="/2015/05/10/Bitmap相关tips的笔记/" class="article-date">
+  <time datetime="2015-05-10T06:42:00.000Z" itemprop="datePublished">2015-05-10</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/Bash/">Bash</a>
+    <a class="article-category-link" href="/categories/Android/">Android</a>
   </div>
 
   </div>
@@ -90,8 +76,8 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
       <header class="article-header">
         
   
-    <h1 class="article-title" itemprop="name">
-      统计Android项目java文件代码量
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/05/10/Bitmap相关tips的笔记/">Bitmap相关tips的笔记</a>
     </h1>
   
 
@@ -99,45 +85,33 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>切到项目的java文件目录下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ find . <span class="string">"("</span> -name <span class="string">"*.java"</span> <span class="string">")"</span> -print | xargs wc <span class="_">-l</span></div></pre></td></tr></table></figure></p>
-<p>即可获取到java文件的代码量</p>
-<p>add</p>
-<p>批量修改指定文件夹下的匹配上的字符串</p>
-<p>find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’</p>
-
+        <p>&nbsp;&nbsp;掌握如何使用通用的技术来加载bitmap对象是保证UI界面流畅性的前提之一。如果在应用中不注意这一点的话，bitmap对象很快就消耗掉应用的内存，最终导致内存溢出异常。</p>
+<pre><code>java.lang.OutofMemoryError:bitmap size exceeds VM budget
+</code></pre><p>&nbsp;&nbsp;下面的内容就是如何在android中高效加载Bitmap的一些tips，参考自官网的training。<br>
+        
+          <p class="article-more-link">
+            <a href="/2015/05/10/Bitmap相关tips的笔记/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/03/01/统计代码量/" data-id="cj4jl0o40001595by9543my4y" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2015/05/10/Bitmap相关tips的笔记/" data-id="cj4jl0o2h000095by0t4i1j36" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
-
     </footer>
   </div>
   
-    
-<nav id="article-nav">
-  
-    <a href="/2016/07/08/Android-WebView开发tips/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Android WebView开发tips
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2015/12/02/ThreadLocal的工作原理/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">ThreadLocal的工作原理</div>
-    </a>
-  
-</nav>
+</article>
+
 
   
-</article>
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span>
+  </nav>
 
 </section>
         

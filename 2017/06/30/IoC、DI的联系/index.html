@@ -3,30 +3,24 @@
 <head>
   <meta charset="utf-8">
   
-  <title>统计Android项目java文件代码量 | 张翔的博客</title>
+  <title>IoC、DI的联系 | 张翔的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="切到项目的java文件目录下:1$ find . &quot;(&quot; -name &quot;*.java&quot; &quot;)&quot; -print | xargs wc -l
-即可获取到java文件的代码量
-add
-批量修改指定文件夹下的匹配上的字符串
-find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
+  <meta name="description" content="控制反转是一种把主程序随意引入其他资源的能力转交给第三方容器, 由第三方容器在运行期建立起主程序与资源文件之间的联系的思想，这样的好处就是避免了主程序与资源文件之间的大量耦合, 通过这个第三方容器实现了依赖的隔离。
+通过控制反转思想，成功的把主程序依赖各种资源文件转化成主程序只依赖了第三方容器暴露出的接口
+那么问题是:主程序所依赖的资源文件是如何被第三方容器所依赖的呢?，实现的方式便是依赖注入(D">
 <meta property="og:type" content="article">
-<meta property="og:title" content="统计Android项目java文件代码量">
-<meta property="og:url" content="http://zhangxiaang.github.io/2016/03/01/统计代码量/index.html">
+<meta property="og:title" content="IoC、DI的联系">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/06/30/IoC、DI的联系/index.html">
 <meta property="og:site_name" content="张翔的博客">
-<meta property="og:description" content="切到项目的java文件目录下:1$ find . &quot;(&quot; -name &quot;*.java&quot; &quot;)&quot; -print | xargs wc -l
-即可获取到java文件的代码量
-add
-批量修改指定文件夹下的匹配上的字符串
-find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
-<meta property="og:updated_time" content="2016-07-12T15:36:35.000Z">
+<meta property="og:description" content="控制反转是一种把主程序随意引入其他资源的能力转交给第三方容器, 由第三方容器在运行期建立起主程序与资源文件之间的联系的思想，这样的好处就是避免了主程序与资源文件之间的大量耦合, 通过这个第三方容器实现了依赖的隔离。
+通过控制反转思想，成功的把主程序依赖各种资源文件转化成主程序只依赖了第三方容器暴露出的接口
+那么问题是:主程序所依赖的资源文件是如何被第三方容器所依赖的呢?，实现的方式便是依赖注入(D">
+<meta property="og:updated_time" content="2017-06-30T08:13:16.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="统计Android项目java文件代码量">
-<meta name="twitter:description" content="切到项目的java文件目录下:1$ find . &quot;(&quot; -name &quot;*.java&quot; &quot;)&quot; -print | xargs wc -l
-即可获取到java文件的代码量
-add
-批量修改指定文件夹下的匹配上的字符串
-find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
+<meta name="twitter:title" content="IoC、DI的联系">
+<meta name="twitter:description" content="控制反转是一种把主程序随意引入其他资源的能力转交给第三方容器, 由第三方容器在运行期建立起主程序与资源文件之间的联系的思想，这样的好处就是避免了主程序与资源文件之间的大量耦合, 通过这个第三方容器实现了依赖的隔离。
+通过控制反转思想，成功的把主程序依赖各种资源文件转化成主程序只依赖了第三方容器暴露出的接口
+那么问题是:主程序所依赖的资源文件是如何被第三方容器所依赖的呢?，实现的方式便是依赖注入(D">
   
     <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
   
@@ -73,16 +67,12 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-统计代码量" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-IoC、DI的联系" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/01/统计代码量/" class="article-date">
-  <time datetime="2016-03-01T11:42:35.000Z" itemprop="datePublished">2016-03-01</time>
+    <a href="/2017/06/30/IoC、DI的联系/" class="article-date">
+  <time datetime="2017-06-30T07:58:27.000Z" itemprop="datePublished">2017-06-30</time>
 </a>
     
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Bash/">Bash</a>
-  </div>
-
   </div>
   <div class="article-inner">
     
@@ -91,7 +81,7 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
         
   
     <h1 class="article-title" itemprop="name">
-      统计Android项目java文件代码量
+      IoC、DI的联系
     </h1>
   
 
@@ -99,19 +89,17 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>切到项目的java文件目录下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ find . <span class="string">"("</span> -name <span class="string">"*.java"</span> <span class="string">")"</span> -print | xargs wc <span class="_">-l</span></div></pre></td></tr></table></figure></p>
-<p>即可获取到java文件的代码量</p>
-<p>add</p>
-<p>批量修改指定文件夹下的匹配上的字符串</p>
-<p>find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’</p>
+        <p>控制反转是一种<strong>把主程序随意引入其他资源的能力转交给第三方容器, 由第三方容器在运行期建立起主程序与资源文件之间的联系</strong>的思想，这样的好处就是避免了主程序与资源文件之间的大量耦合, 通过这个第三方容器实现了依赖的隔离。</p>
+<p>通过控制反转思想，成功的把<strong>主程序依赖各种资源文件转化成主程序只依赖了第三方容器暴露出的接口</strong></p>
+<p>那么问题是:<strong>主程序所依赖的资源文件是如何被第三方容器所依赖的呢?</strong>，实现的方式便是<strong>依赖注入(DI)</strong>, 依赖注入的实现方式最简单就是利用注解, 参考ButterKnife/Dagger.</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/03/01/统计代码量/" data-id="cj4jl0o40001595by9543my4y" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/06/30/IoC、DI的联系/" data-id="cj4jl0o2t000495bys17b4gdd" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/统计java代码量/">统计java代码量</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IoC-依赖注入/">IoC 依赖注入</a></li></ul>
 
     </footer>
   </div>
@@ -119,19 +107,10 @@ find . -type f | xargs sed -i ‘s/target_str/修改后的str/g’">
     
 <nav id="article-nav">
   
-    <a href="/2016/07/08/Android-WebView开发tips/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Android WebView开发tips
-        
-      </div>
-    </a>
   
-  
-    <a href="/2015/12/02/ThreadLocal的工作原理/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">ThreadLocal的工作原理</div>
+      <div class="article-nav-title">ContentResolver.query-&gt;ContentProvider.query的流程.md</div>
     </a>
   
 </nav>

@@ -26,7 +26,7 @@ webView内存泄露的问题
 Js与native端的两种交互方式实现的原理解析
 打包时混淆代码需要注意的地方">
 <meta property="og:image" content="http://img.blog.csdn.net/20131129150121656?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvRlhfU0tZ/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:updated_time" content="2016-10-10T03:44:54.000Z">
+<meta property="og:updated_time" content="2017-06-28T11:02:31.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android WebView开发tips">
 <meta name="twitter:description" content="webView 优化的tips(native端):
@@ -73,9 +73,9 @@ Js与native端的两种交互方式实现的原理解析
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Buscar"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -301,7 +301,7 @@ WebViewProvider.ViewDelegate {
         mJavaScriptObjects.put(interfaceName,
             new JSObject(obj, requireAnnotation));
     }
-</code></pre><p>其中mJavaScriptObjects是一个Map<string,jsobject>的map,执行到这里native端的对象的转换工作也都完成了，接下来就是两端的对象绑定工作了。由于mJavaScriptObjects中包含了所有的jsObj对象，所以入口就是遍历这个map，将每一个jsObj通过JNI方法nativeAddJavascriptInterface来实现对象绑定。简化的jni方法如下：</string,jsobject></p>
+</code></pre><p>其中mJavaScriptObjects是一个Map<string,jsobject>的map,执行到这里native端的对象的转换工作也都完成了，接下来就是两端的对象绑定工作了。由于mJavaScriptObjects中包含了所有的jsObj对象，所以入口就是遍历这个map，将每一个jsObj通过JNI方法nativeAddJavascriptInterface来实现对象绑定。这个入口在JS绑定对象到native的时候会通过某种方式调用了FrameLoaderClientAndroid.cpp里面的windowObjectCleared()函数;通过JNI调取BrowserFrame.java里面的windowObjectCleared()函数,然后遍历上述的jsObjMap,一个个的通过nativeAddJavascriptInterface()注册到中间层,简化的jni addJSInterface的方法如下：</string,jsobject></p>
 <pre><code>static void AddJavascriptInterface(JNIEnv *env, jobject obj, jint nativeFramePointer,jobject javascriptObj, jstring interfaceName, jboolean requireAnnotation){
     WebCore::Frame* pFrame = 0;
     if (nativeFramePointer == 0)
@@ -375,7 +375,7 @@ WebViewProvider.ViewDelegate {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2016/07/08/Android-WebView开发tips/" data-id="cj4gourdd0001t4bynumzdyff" class="article-share-link">Compartir</a>
+      <a data-url="http://zhangxiaang.github.io/2016/07/08/Android-WebView开发tips/" data-id="cj4jl0o2l000195by7cldsdiq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -385,7 +385,7 @@ WebViewProvider.ViewDelegate {
 <nav id="article-nav">
   
     <a href="/2016/09/03/新生代gc会去遍历老生代区查看被引用的对象吗?/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Nuevo</strong>
+      <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
           新生代gc会去遍历老生代区查看被引用的对象吗?
@@ -395,7 +395,7 @@ WebViewProvider.ViewDelegate {
   
   
     <a href="/2016/03/01/统计代码量/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Viejo</strong>
+      <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">统计Android项目java文件代码量</div>
     </a>
   
@@ -410,9 +410,13 @@ WebViewProvider.ViewDelegate {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Posts recientes</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/06/30/IoC、DI的联系/">IoC、DI的联系</a>
+          </li>
         
           <li>
             <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/">ContentResolver.query-&gt;ContentProvider.query的流程.md</a>
@@ -430,10 +434,6 @@ WebViewProvider.ViewDelegate {
             <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
           </li>
         
-          <li>
-            <a href="/2017/03/21/synchronized-vs-volatile/">synchronized vs volatile.md</a>
-          </li>
-        
       </ul>
     </div>
   </div>
@@ -447,7 +447,7 @@ WebViewProvider.ViewDelegate {
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2017 Aaron<br>
-      Construido por <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
