@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>张翔的博客</title>
+  <title>PKMS 分析.md | 张翔的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="张翔的博客">
-<meta property="og:url" content="http://zhangxiaang.github.io/index.html">
+  <meta name="description" content="PKMS 的分析从两个角度来看, 一个是Client进程另一个是Server进程:在IPackageManager.aidl文件中, 申明了所有Client和Server之间有业务交流的接口, 在经过编译后会生成一个面向Server端的Stub 类,Stub 所实现的onTransact()函数就是用于响应来自Client端的远程调用; 同时还会生成一个Stub.Proxy 类是面向Client端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PKMS 分析.md">
+<meta property="og:url" content="http://zhangxiaang.github.io/2017/07/04/PKMS-分析/index.html">
 <meta property="og:site_name" content="张翔的博客">
+<meta property="og:description" content="PKMS 的分析从两个角度来看, 一个是Client进程另一个是Server进程:在IPackageManager.aidl文件中, 申明了所有Client和Server之间有业务交流的接口, 在经过编译后会生成一个面向Server端的Stub 类,Stub 所实现的onTransact()函数就是用于响应来自Client端的远程调用; 同时还会生成一个Stub.Proxy 类是面向Client端">
+<meta property="og:updated_time" content="2017-07-04T09:45:27.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="张翔的博客">
+<meta name="twitter:title" content="PKMS 分析.md">
+<meta name="twitter:description" content="PKMS 的分析从两个角度来看, 一个是Client进程另一个是Server进程:在IPackageManager.aidl文件中, 申明了所有Client和Server之间有业务交流的接口, 在经过编译后会生成一个面向Server端的Stub 类,Stub 所实现的onTransact()函数就是用于响应来自Client端的远程调用; 同时还会生成一个Stub.Proxy 类是面向Client端">
   
     <link rel="alternate" href="/atom.xml" title="张翔的博客" type="application/atom+xml">
   
@@ -57,9 +61,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-PKMS-分析" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-PKMS-分析" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/07/04/PKMS-分析/" class="article-date">
   <time datetime="2017-07-04T02:11:00.000Z" itemprop="datePublished">2017-07-04</time>
@@ -72,8 +74,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/04/PKMS-分析/">PKMS 分析.md</a>
+    <h1 class="article-title" itemprop="name">
+      PKMS 分析.md
     </h1>
   
 
@@ -102,153 +104,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-IoC、DI的联系" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/06/30/IoC、DI的联系/" class="article-date">
-  <time datetime="2017-06-30T07:58:27.000Z" itemprop="datePublished">2017-06-30</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/30/IoC、DI的联系/">IoC、DI的联系</a>
-    </h1>
+    <a href="/2017/06/30/IoC、DI的联系/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">이전</strong>
+      <div class="article-nav-title">IoC、DI的联系</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>控制反转是一种<strong>把主程序随意引入其他资源的能力转交给第三方容器, 由第三方容器在运行期建立起主程序与资源文件之间的联系</strong>的思想，这样的好处就是避免了主程序与资源文件之间的大量耦合, 通过这个第三方容器实现了依赖的隔离。</p>
-<p>通过控制反转思想，成功的把<strong>主程序依赖各种资源文件转化成主程序只依赖了第三方容器暴露出的接口</strong></p>
-<p>那么问题是:<strong>主程序所依赖的资源文件是如何被第三方容器所依赖的呢?</strong>，实现的方式便是<strong>依赖注入(DI)</strong>, 依赖注入的实现方式最简单就是利用注解, 参考ButterKnife/Dagger.</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/06/30/IoC、DI的联系/" data-id="cj5mmqmgi000i6wfy6oj1ghz1" class="article-share-link">공유</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IoC-依赖注入/">IoC 依赖注入</a></li></ul>
-
-    </footer>
-  </div>
   
 </article>
-
-
-  
-    <article id="post-ContentResolver-query-ContentProvider-query的流程-md" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" class="article-date">
-  <time datetime="2017-06-12T10:50:00.000Z" itemprop="datePublished">2017-06-12</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/">ContentResolver.query-&gt;ContentProvider.query的流程.md</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>每一个Application都有一个全局的mContentResolver对象, 作为内部类继承ContentProvider. 主要的职责是根据提供的auth字符串来找到一个可用的ContentProvider. 在mContentResolver的实现中覆盖了ContentProvider的抽象函数acquireProvider(Context context,String auth)和acquireExistingProvider(Context context,String auth)函数, 把定位ContentProvider的逻辑转交给了ActivityThread对象内部处理:<br>在acquireProvider的入口,先检测是否已经有可用的Providers对象,如果是查询已经存在了的ContentProvider则走acquireExistingProvider(), 否则继续走installProviders的流程.<br>在acquireExistingProvider()函数中首先是对mProviderMap对象的同步加锁操作, 避免出现竞态问题. mProviderMap是一个ProviderKey-&gt;ProviderClient的Map对象, 存放的ContentProvider为当前进程内的ContentProviders, 而ProviderKey是由(authString,userId)组成的一个Provider唯一标志符. 在检索出对应的ProviderClientRecorder后还得检查一下此ContentProvider附着的进程是否是Alive状态, 否则也是不可用的。只有在可用的状态下, 才会拿到一个ContentProvider对应的一个IBinder接口对象, 后续就能通过此Binder接口进行Uri数据交互啦.</p>
-<p>如果是走installProviders的流程, 则通过ActivityManagerService对象的getContentProviderImpl()实现; 在通过getDefault()获取到的就是ActivityManager的一个代理对象, 通过binder代理对象的getContentProvider()接口调用到ActivityManagerService端的getContentProvider(). ActivityManagerService端的getContentProviderImpl()函数是核心实现代码. </p>
-<p>在ActivityManagerService中也有一个mProviderMap对象,不过是一个ProviderMap的对象. 可以通过conponentName+uid 来查询到一个ContentProviderRecord对象, 首先用的是普通传递过来的UID配合conponentName去查,如果没查到, 则把UID换成root级别也就是uid=0 来查询ContentProviderRecord对象, 在拿到这个ContentProviderRecord对象后继续对其进行单例检查, </p>
-<ul>
-<li>如果得到的ContentProviderRecord不为空, 在通过权限检查后通过recorder初始化出一个 ContentProviderHolder返回即可. </li>
-<li>如果得到的ContentProviderRecord为空, 根据ComponentName，从ActivityManagerService.mProviderMap中查询相应的ContentProviderRecord;当首次调用，则创建对象ContentProviderRecord.然后返回.</li>
-</ul>
-<p>所以可以理解流程为: ContentProvider在本地进程中如果有可用的话, 则直接从ActivityThread的mProviderMap对象中根据AuthString找到对应的provider;(此阶段尚处于Client_Process)<br>如果本地进程中并没有install过provider的话则需要AMS来先搜索一下对应ComponentName的provider对象(System_process), 如果系统进程尚未加载过对应的Provider, 则跳到installProvider的流程中, 把最终即将publish的Provider回馈给系统进程, 系统进程告知 Client_Process 添加新的ContentProvider对象到mProviderMap对象里面.</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/06/12/ContentResolver-query-ContentProvider-query的流程-md/" data-id="cj5mmqmfy00036wfy88af0o7x" class="article-share-link">공유</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Head-First-Java-Future" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/05/10/Head-First-Java-Future/" class="article-date">
-  <time datetime="2017-05-10T07:07:55.000Z" itemprop="datePublished">2017-05-10</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/10/Head-First-Java-Future/">Head First Java Future</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>介绍:</p>
-<p>Future是JDK7中并发包里新增的一个接口, 持有的范型<v> 即为调用Future的get()返回的值类型. </v></p>
-<p>Future对象被视作为一个异步计算任务的结果对象, 它提供方法去检测异步任务是否已完成, get()过程中当前线程会进入阻塞状态等待result的返回. 它的get()方法可以保证在异步任务未结束之前不会返回任何值, 从而保证了异步任务执行的完整性, 当然也可以为get()设置一个timeout, 超时则自动停止阻塞状态; 并且提供了cancel()方法来取消当前任务. </p>
-<p>一个比较常见的场景: 通过ExecutorService执行了一个异步任务并返回一个future对象, 当前线程接着去做一些其他的事务, 而此任务并没有设置相应的任务回调, 所以即使完成了任务也没办法通知到当前线程”任务结束”. 所以在当前线程内需要用到任务结果的时候, 可以通过future.get()来获取结果, 当然在get()的时候任务可能仍在执行导致当前线程进入阻塞状态等待任务结束或者抛出异常, 所以可能会产生InterruptedException/ExecutionException 异常。</p>
-<p>JDK自带的实现:FutureTask</p>
-<p>Guava的相关实现:ListenableFuture</p>
-<p>FutureTask 就是一个实现了RunnableFuture接口的类, 被线程池调度出的workThread执行run()函数, 而实际的耗时任务被放进Callable接口里的call(). workThread 在进入到run()内部的时候会通过callable的call()去真正调起耗时任务, 并且该workThread会一直阻塞到耗时计算完成为止(or exception). 所以说配合线程池来实现并发操作真的是太perfect了.</p>
-<p>ListenableFuture 在Guava的的此接口简介中, 强烈建议使用ListenableFuture来替代JDK的Future接口, 那么此接口的意义是什么呢?相比较JDK的Future接口, 拓展了什么呢?</p>
-<p>传统的Future接口在计算工作完成后, 调用方是不能及时的知道此计算工作的完成时刻, 也就无法确保在一个正确的时间点去拿到执行结果的, 唯一的方式是通过get()去读取这个result, 在get()调用的时候任务仍可能处于执行状态, 那么调用方就可能进入阻塞状态直到计算任务的结束.</p>
-<p>对于这样的问题, ListenableFuture提供了一个注册listener机制, 在任务结束结束的时刻即可通过此listener来回馈计算结果. 相比较于Future, ListenableFuture新增的函数为:</p>
-<p>addListener(Runnable listener, Executor executor);</p>
-<p>其中的参数listener对象就是作为一个回调传入到task的内部, 在workThread开始执行了run()方法并且拿到结果后, 就立马通过listener.run()函数来通知调用方结果可用, 不再需要调用方通过get()去拿一个”未知状态”的result。这样使得并发操作更为简便以及准确了.</p>
-<p>顺带着说一下线程池(Executor)与ListenableFuture的完美配合, 前者专注于多线程的调度, 为后者提供一个可靠的运行环境而不需要具体考虑任务执行的逻辑; 后者则专注于任务的执行以及结果的回调而不需要考虑任务执行所在的环境问题. 从而实现了异步编程这个抽象目标.</p>
-<p>但是话说回来, 对于嵌套的FutureTask可能就会出现一些问题了, 具体参考gist上的这个 <img src="https://gist.github.com/benjchristensen/4671081" alt="Example"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/05/10/Head-First-Java-Future/" data-id="cj5mmqmg400066wfyluv72x79" class="article-share-link">공유</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Future-并发/">Future/并发</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
-
-  <nav id="page-nav">
-    
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">다음 &raquo;</a>
-  </nav>
 
 </section>
         

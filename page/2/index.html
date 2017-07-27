@@ -48,7 +48,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="검색"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -58,6 +58,54 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-Looper-loop-是否导致主线程卡死问题探讨" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" class="article-date">
+  <time datetime="2017-04-26T07:01:23.000Z" itemprop="datePublished">2017-04-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>知乎一个问题很好: 在执行ActivityThread的main函数体内,执行了Looper.loop()函数,这是个for(; ;)循环为何不会导致主线程进入死循环体从而被卡死呢?</p>
+<p>首先理解什么叫做“线程进入死循环”, 在循环体内就是一段可执行的子程序,由于for(; ;)的调度导致这段子程序持续不断的在执行, 也就是持续的占用CPU资源, 从而导致当前线程的循环体外的子程序无法执行, 导致线程卡死的状态。</p>
+<p>而实际上, 在Looper的loop循环体内是不会导致当前线程被卡死的,原因如下:<br>由于MessageQueue的阻塞机制, 主线程会处于阻塞状态, 保证了程序的不退出, 所以可以看作是一种“假卡死”状态, 倘若这个循环体结束了意味着主线程该停止运行了, 那么app可以退出了。</p>
+<ul>
+<li>MessageQueue的阻塞机制: 在循环体内第一件事儿就是从mq里面取出一个msg操作, 即queue.next(); 此操作为阻塞操作, 如果当前线程阻塞的话就会释放掉CPU的占用, 进入阻塞状态.</li>
+</ul>
+<p>而在这个循环体内是如何调用到循环体外部的子程序呢?</p>
+<ul>
+<li>通过从messageQueue取出来的msg的targetHandler机制, 把取出来的消息dispatch到对应的handler那里, 在handler的handleMessage函数里面去执行一些逻辑, 诸如onCreate,onResume之类的函数. 这样就可以在循环体内执行循环体外的子程序了。</li>
+</ul>
+<p>ActivityThread内的所有message就是来自其他线程send过来的,全部都放到了这个MessageQueue对象中; 例如binder线程的消息也是通过handler方式传递给ActivityThread的queuede。<br>而activity的生命周期调度也是靠ActivityThread的H(extends Handler)类, 任何一个与生命周期相关的消息, 都会把target设置为H, 这样才能够确保在for(; ;)中取出的每一个message都能够通过message.target.sendMessage(msg)的方式通知H类的handleMessage()方法,进而调用不同的生命周期处理函数。</p>
+<p>让ActivityThread进入”假卡死”状态, 一来不需要持续的占用CPU资源, 二来可以保证应用的不退出, 随时可以相应消息avaliable, 而我们的手机大多情况下都是处于等待用户输入的状态, ActivityThread的假卡死状态是最适合这种模式的交互方式的设备。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://zhangxiaang.github.io/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/" data-id="cj5mmqmgd000d6wfywpydlakf" class="article-share-link">공유</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-ServiceManager" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -135,7 +183,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj4jl0o2z000795byvrivswgu" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/31/ServiceManager/" data-id="cj5mmqmga000b6wfymj6766us" class="article-share-link">공유</a>
       
       
     </footer>
@@ -199,7 +247,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj4jl0o3k000n95byyc4v6r5o" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/03/21/synchronized-vs-volatile/" data-id="cj5mmqmgu000r6wfyxwv5o3or" class="article-share-link">공유</a>
       
       
     </footer>
@@ -245,56 +293,9 @@ while(inputStream.read(buffer) != -1){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj4jl0o32000995by3ex03bv6" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2017/02/21/I-O/" data-id="cj5mmqmg600076wfyibhqv4nn" class="article-share-link">공유</a>
       
       
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-StringBuilder是复用好还是new好" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/01/06/StringBuilder是复用好还是new好/" class="article-date">
-  <time datetime="2017-01-06T05:10:31.000Z" itemprop="datePublished">2017-01-06</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/06/StringBuilder是复用好还是new好/">StringBuilder是复用好还是new好?</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <a id="more"></a>
-<p>&emsp;&emsp;有时候遇到一些拼接字符串的需求,上一个字符串拼接完了下一个字符串需要再次用到StringBuilder了,此时到底是为了减少memory allocate去复用上一个StringBuilder好还是干脆直接新建一个StringBuilder好呢?</p>
-<p>例如有这么一个需求:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder b = <span class="keyword">new</span> StringBuilder();</div><div class="line"><span class="comment">//build up a string</span></div><div class="line">b.delete(<span class="number">0</span>, b.length());</div><div class="line"><span class="comment">//reuse it</span></div></pre></td></tr></table></figure>
-<p>这样在后期代码交接维护的时候会带来疑惑? 这个StringBuilder到底是来干嘛的? 与其话几行的注释去解释为何要这么做, 还不如写一个方法, 来改变这一个StringBuilder的名称(利用final保持引用不改变即可)从而避免遇到这样的问题 :</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> StringBuilder <span class="title">renameForReuse</span><span class="params">(StringBuilder sb)</span></span>&#123;</div><div class="line">	sb.delete(<span class="number">0</span>, sb.length());</div><div class="line">   	<span class="keyword">return</span> sb;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>于是乎, 上述的代码可以写成:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder b1 = <span class="keyword">new</span> StringBuilder();</div><div class="line"><span class="comment">//build up a string use b1</span></div><div class="line">StringBuilder b2 = renameForReuse(b1);</div><div class="line"><span class="comment">//reuse it and rename to b2</span></div></pre></td></tr></table></figure>
-<p>这样看起来就清爽多了,也不需要注释因为函数名称足够解释b2是干嘛的了 ;) </p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2017/01/06/StringBuilder是复用好还是new好/" data-id="cj4jl0o3d000h95byo4y3tp88" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Code/">Code</a></li></ul>
-
     </footer>
   </div>
   
@@ -306,7 +307,7 @@ while(inputStream.read(buffer) != -1){
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+    <a class="extend prev" rel="prev" href="/">&laquo; 이전</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">다음 &raquo;</a>
   </nav>
 
 </section>
@@ -315,9 +316,13 @@ while(inputStream.read(buffer) != -1){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">최근 포스트</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/07/04/PKMS-分析/">PKMS 分析.md</a>
+          </li>
         
           <li>
             <a href="/2017/06/30/IoC、DI的联系/">IoC、DI的联系</a>
@@ -333,10 +338,6 @@ while(inputStream.read(buffer) != -1){
         
           <li>
             <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
-          </li>
-        
-          <li>
-            <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
           </li>
         
       </ul>

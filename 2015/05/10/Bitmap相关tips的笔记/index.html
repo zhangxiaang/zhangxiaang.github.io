@@ -15,7 +15,7 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
 <meta property="og:description" content="&amp;nbsp;&amp;nbsp;掌握如何使用通用的技术来加载bitmap对象是保证UI界面流畅性的前提之一。如果在应用中不注意这一点的话，bitmap对象很快就消耗掉应用的内存，最终导致内存溢出异常。
 java.lang.OutofMemoryError:bitmap size exceeds VM budget
 &amp;nbsp;&amp;nbsp;下面的内容就是如何在android中高效加载Bitmap的一些tip">
-<meta property="og:updated_time" content="2017-04-20T09:30:00.000Z">
+<meta property="og:updated_time" content="2017-07-20T02:10:05.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Bitmap相关tips的笔记">
 <meta name="twitter:description" content="&amp;nbsp;&amp;nbsp;掌握如何使用通用的技术来加载bitmap对象是保证UI界面流畅性的前提之一。如果在应用中不注意这一点的话，bitmap对象很快就消耗掉应用的内存，最终导致内存溢出异常。
@@ -58,7 +58,7 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="검색"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://zhangxiaang.github.io"></form>
@@ -97,15 +97,16 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
 <pre><code>java.lang.OutofMemoryError:bitmap size exceeds VM budget
 </code></pre><p>&nbsp;&nbsp;下面的内容就是如何在android中高效加载Bitmap的一些tips，参考自官网的training。<br><a id="more"></a></p>
 <ul>
-<li><p><strong>高效加载Bitmap</strong></p>
-<ul>
+<li><strong>高效加载Bitmap</strong><ul>
 <li>BitmapFactory类提供一些方法来构造            bitmap(decodeByteArray(),decodeFile(),decodeResource()..)这些方法为了构建bitmap    会调用内存，因此如果不加注意的话很容易导致OOM异常(毕竟bitmap都不小)。如果设置BitmapFactory.Option类的    <em>inJustDecodeBounds</em>属性为true的话可以让系统只是简单的解析原始图片的宽和高等信息(进而判断    这个bitmap资源的大小是否跟imageView大小一致，如果大于imageView的话就应该做压缩从而减少加载    这个bitmap所消耗的资源)，而不是粗暴的去加载整个图片(如果只是读取宽高信息完全没必要去下载整个图    片).如果设置是false(默认也是false)的话,option的outWidth,outHeight,outMimeType返回的    都是null.这个<em>inJustDecodeBounds</em>属性帮助我们不去加载整个图片就可以读取图片的基本信息。</li>
 <li>例如有如下情景：一张bitmap原始大小为1024x768，但是imageView的大小却只有128x96大小，bitmap尺寸远远大于imageView。解决方案如下<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Bitmap <span class="title">decodeSampledBitmapFromResource</span><span class="params">(Resources res, <span class="keyword">int</span> resId,</span></span></div><div class="line">        <span class="keyword">int</span> reqWidth, <span class="keyword">int</span> reqHeight) &#123;</div><div class="line">        </div><div class="line">    <span class="keyword">final</span> BitmapFactory.Options options = <span class="keyword">new</span> BitmapFactory.Options();</div><div class="line">    options.inJustDecodeBounds = <span class="keyword">true</span>;</div><div class="line">    BitmapFactory.decodeResource(res, resId, options);<span class="comment">//解析出bitmap的原始大小信息</span></div><div class="line"></div><div class="line">    <span class="comment">// Calculate inSampleSize</span></div><div class="line">    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);</div><div class="line"></div><div class="line">    <span class="comment">// 解析完了后记得把options.inJustDecodeBounds属性关掉</span></div><div class="line">    options.inJustDecodeBounds = <span class="keyword">false</span>;</div><div class="line">    <span class="keyword">return</span> BitmapFactory.decodeResource(res, resId, options);</div><div class="line">    <span class="comment">//这个时候options.inJustDecodeBounds为false那么返回的bitmap就是完全解析了的对象</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">calculateInSampleSize</span><span class="params">(</span></span></div><div class="line">            BitmapFactory.Options options, <span class="keyword">int</span> reqWidth, <span class="keyword">int</span> reqHeight) &#123;</div><div class="line">    <span class="comment">//传递进来的option.injustDecode --&gt;true</span></div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> height = options.outHeight;</div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> width = options.outWidth;</div><div class="line">    <span class="keyword">int</span> inSampleSize = <span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (height &gt; reqHeight || width &gt; reqWidth) &#123;</div><div class="line"></div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> halfHeight = height / <span class="number">2</span>;</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> halfWidth = width / <span class="number">2</span>;</div><div class="line">        <span class="comment">// Calculate the largest inSampleSize value that is a power of 2 and keeps both</span></div><div class="line">        <span class="comment">// height and width larger than the requested height and width.</span></div><div class="line">        <span class="keyword">while</span> ((halfHeight / inSampleSize) &gt; reqHeight</div><div class="line">                &amp;&amp; (halfWidth / inSampleSize) &gt; reqWidth) &#123;</div><div class="line">            inSampleSize *= <span class="number">2</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> inSampleSize;</div><div class="line">&#125;</div><div class="line">使用如下:</div><div class="line">mImageView.setImageBitmap(decodeSampledBitmapFromResource(</div><div class="line">		getResources(), R.id.myimage, <span class="number">128</span> , <span class="number">96</span>));</div></pre></td></tr></table></figure>
 </li>
 </ul>
 </li>
-<li><p><strong>在非UI线程中加载位图</strong></p>
+</ul>
+<p>总结就是如果Bitmap的尺寸远大于imageView的话可以尝试加载小bitmap从而节省内存空间: 开启Options的InJustDecodeBounds开关读取Bitmap资源的宽高. 接着计算targetSize是原图的几分之几, 把这个值作为options的sample, 最后才通过BitmapFactory.decode*()传入这个options,最终加载到的bitmap就是最节省内存资源的bitmap了。</p>
 <ul>
+<li><strong>在非UI线程中加载位图</strong><ul>
 <li>如果调用BitmapFactory.decodeFile()函数或者是从网络上加载图片资源的话就不应该放在主线程中进行。官网建议的是采用AsyncTask来异步执行解析操作，也就是把decode操作放在了doInBackGround里，也很好理解，不过AsyncTask会持有外部组件imageView的引用，采取WeakReference<imageview>就可以防止内存泄漏的问题。</imageview></li>
 <li>不过很多人建议是在android代码中减少使用AsyncTask(为何减少使用见另一篇博文).而是采用Thread+Handler来解决这个问题。把decode操作放在线程的run()方法里面，然后利用handler来实现自线程和UI线程的交互。</li>
 </ul>
@@ -139,11 +140,13 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
 </ul>
 </li>
 </ul>
-
+<p>如何为低版本Bitmap(没有alpha channel)添加alpha channel呢?</p>
+<p>rgb-&gt;argb :</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Bitmap <span class="title">adjustOpacity</span><span class="params">(Bitmap bitmap, <span class="keyword">int</span> opacity)</span> </span>&#123;</div><div class="line">    Bitmap mutableBitmap = bitmap.isMutable()</div><div class="line">                           ? bitmap</div><div class="line">                           : bitmap.copy(Bitmap.Config.ARGB_8888, <span class="keyword">true</span>);</div><div class="line">    Canvas canvas = <span class="keyword">new</span> Canvas(mutableBitmap);</div><div class="line">    <span class="keyword">int</span> color = (opacity &amp; <span class="number">0xFF</span>) &lt;&lt; <span class="number">24</span>; <span class="comment">//把alpha通道向左移 3 * 8 位</span></div><div class="line">    canvas.drawColor(color, PorterDuff.Mode.DST_IN);<span class="comment">// 拿到copy出来的bitmap的canvas对象的基础上添加alpha像素数据</span></div><div class="line">    <span class="keyword">return</span> mutableBitmap;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://zhangxiaang.github.io/2015/05/10/Bitmap相关tips的笔记/" data-id="cj4jl0o2h000095by0t4i1j36" class="article-share-link">Share</a>
+      <a data-url="http://zhangxiaang.github.io/2015/05/10/Bitmap相关tips的笔记/" data-id="cj5mmqmfo00006wfyqoqir25t" class="article-share-link">공유</a>
       
       
     </footer>
@@ -153,7 +156,7 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
 <nav id="article-nav">
   
     <a href="/2015/08/02/处理Runtime-Changed的官方建议/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
+      <strong class="article-nav-caption">최신</strong>
       <div class="article-nav-title">
         
           处理Runtime Changed的官方建议
@@ -173,9 +176,13 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">최근 포스트</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/07/04/PKMS-分析/">PKMS 分析.md</a>
+          </li>
         
           <li>
             <a href="/2017/06/30/IoC、DI的联系/">IoC、DI的联系</a>
@@ -191,10 +198,6 @@ java.lang.OutofMemoryError:bitmap size exceeds VM budget
         
           <li>
             <a href="/2017/04/26/Looper-loop-是否导致主线程卡死问题探讨/">Looper.loop()是否导致主线程卡死问题探讨</a>
-          </li>
-        
-          <li>
-            <a href="/2017/03/31/ServiceManager/">ServiceManager</a>
           </li>
         
       </ul>
